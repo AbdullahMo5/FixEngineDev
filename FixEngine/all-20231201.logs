@@ -1,0 +1,262 @@
+2023-12-01 14:19:51.878 +05:00 [INF] Fetching weather
+2023-12-01 14:26:00.458 +05:00 [INF] Fetching weather
+2023-12-01 14:28:04.016 +05:00 [INF] Fetching weather
+2023-12-01 14:39:53.205 +05:00 [DBG] Registered model binder providers, in the following order: ["Microsoft.AspNetCore.Mvc.ModelBinding.Binders.BinderTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ServicesModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.BodyModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.HeaderModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FloatingPointTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.EnumTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.DateTimeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.SimpleTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.TryParseModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.CancellationTokenModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ByteArrayModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FormFileModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FormCollectionModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.KeyValuePairModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.DictionaryModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ArrayModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.CollectionModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ComplexObjectModelBinderProvider"]
+2023-12-01 14:39:53.336 +05:00 [DBG] Hosting starting
+2023-12-01 14:39:53.605 +05:00 [INF] Now listening on: https://localhost:7261
+2023-12-01 14:39:53.607 +05:00 [INF] Now listening on: http://localhost:5116
+2023-12-01 14:39:53.608 +05:00 [DBG] Loaded hosting startup assembly FixEngine
+2023-12-01 14:39:53.609 +05:00 [DBG] Loaded hosting startup assembly Microsoft.AspNetCore.Watch.BrowserRefresh
+2023-12-01 14:39:53.609 +05:00 [DBG] Loaded hosting startup assembly Microsoft.WebTools.BrowserLink.Net
+2023-12-01 14:39:53.611 +05:00 [INF] Application started. Press Ctrl+C to shut down.
+2023-12-01 14:39:53.612 +05:00 [INF] Hosting environment: Development
+2023-12-01 14:39:53.612 +05:00 [INF] Content root path: B:\Exinitic\FixEngine\FixEngine\FixEngine
+2023-12-01 14:39:53.613 +05:00 [DBG] Hosting started
+2023-12-01 14:39:53.927 +05:00 [DBG] Connection id "0HMVIA5SFRH0P" received FIN.
+2023-12-01 14:39:53.929 +05:00 [DBG] Connection id "0HMVIA5SFRH0Q" received FIN.
+2023-12-01 14:39:53.945 +05:00 [DBG] Connection id "0HMVIA5SFRH0P" accepted.
+2023-12-01 14:39:53.945 +05:00 [DBG] Connection id "0HMVIA5SFRH0Q" accepted.
+2023-12-01 14:39:53.950 +05:00 [DBG] Connection id "0HMVIA5SFRH0P" started.
+2023-12-01 14:39:53.953 +05:00 [DBG] Connection id "0HMVIA5SFRH0Q" started.
+2023-12-01 14:39:54.158 +05:00 [DBG] Failed to authenticate HTTPS connection.
+System.IO.IOException:  Received an unexpected EOF or 0 bytes from the transport stream.
+   at System.Net.Security.SslStream.ReceiveBlobAsync[TIOAdapter](CancellationToken cancellationToken)
+   at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Https.Internal.HttpsConnectionMiddleware.OnConnectionAsync(ConnectionContext context)
+2023-12-01 14:39:54.158 +05:00 [DBG] Failed to authenticate HTTPS connection.
+System.IO.IOException:  Received an unexpected EOF or 0 bytes from the transport stream.
+   at System.Net.Security.SslStream.ReceiveBlobAsync[TIOAdapter](CancellationToken cancellationToken)
+   at System.Net.Security.SslStream.ForceAuthenticationAsync[TIOAdapter](Boolean receiveFirst, Byte[] reAuthenticationData, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Https.Internal.HttpsConnectionMiddleware.OnConnectionAsync(ConnectionContext context)
+2023-12-01 14:39:54.375 +05:00 [DBG] Connection id "0HMVIA5SFRH0P" stopped.
+2023-12-01 14:39:54.375 +05:00 [DBG] Connection id "0HMVIA5SFRH0Q" stopped.
+2023-12-01 14:39:54.381 +05:00 [DBG] Connection id "0HMVIA5SFRH0P" sending FIN because: "The Socket transport's send loop completed gracefully."
+2023-12-01 14:39:54.381 +05:00 [DBG] Connection id "0HMVIA5SFRH0Q" sending FIN because: "The Socket transport's send loop completed gracefully."
+2023-12-01 14:39:54.463 +05:00 [DBG] Connection id "0HMVIA5SFRH0R" accepted.
+2023-12-01 14:39:54.467 +05:00 [DBG] Connection id "0HMVIA5SFRH0R" started.
+2023-12-01 14:39:54.512 +05:00 [DBG] Connection 0HMVIA5SFRH0R established using the following protocol: "Tls12"
+2023-12-01 14:39:54.604 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/index.html - -
+2023-12-01 14:39:54.649 +05:00 [DBG] Wildcard detected, all requests with hosts will be allowed.
+2023-12-01 14:39:54.694 +05:00 [DBG] No candidates found for the request path '/swagger/index.html'
+2023-12-01 14:39:54.697 +05:00 [DBG] Request did not match any endpoints
+2023-12-01 14:39:54.896 +05:00 [DBG] Response markup is scheduled to include browser refresh script injection.
+2023-12-01 14:39:55.051 +05:00 [INF] HTTP GET /swagger/index.html responded 200 in 347.1131 ms
+2023-12-01 14:39:55.095 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/swagger-ui.css - -
+2023-12-01 14:39:55.095 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_vs/browserLink - -
+2023-12-01 14:39:55.096 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - -
+2023-12-01 14:39:55.101 +05:00 [DBG] No candidates found for the request path '/swagger/swagger-ui.css'
+2023-12-01 14:39:55.105 +05:00 [DBG] Response markup was updated to include browser refresh script injection.
+2023-12-01 14:39:55.280 +05:00 [DBG] Request did not match any endpoints
+2023-12-01 14:39:55.118 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - - - 200 12350 application/javascript;+charset=utf-8 21.9911ms
+2023-12-01 14:39:55.292 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/index.html - - - 200 - text/html;charset=utf-8 701.1826ms
+2023-12-01 14:39:55.383 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_vs/browserLink - - - 200 - text/javascript;+charset=UTF-8 287.4915ms
+2023-12-01 14:39:55.421 +05:00 [DBG] The file transmission was cancelled
+System.OperationCanceledException: The operation was canceled.
+   at System.Threading.CancellationToken.ThrowOperationCanceledException()
+   at System.Threading.CancellationToken.ThrowIfCancellationRequested()
+   at Microsoft.AspNetCore.Http.SendFileResponseExtensions.SendFileAsyncCore(HttpResponse response, IFileInfo file, Int64 offset, Nullable`1 count, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Http.SendFileResponseExtensions.SendFileAsyncCore(HttpResponse response, IFileInfo file, Int64 offset, Nullable`1 count, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.StaticFiles.StaticFileContext.SendAsync()
+2023-12-01 14:39:55.424 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/favicon-16x16.png - -
+2023-12-01 14:39:55.442 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - -
+2023-12-01 14:39:55.459 +05:00 [INF] Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+2023-12-01 14:39:55.465 +05:00 [DBG] No candidates found for the request path '/swagger/favicon-16x16.png'
+2023-12-01 14:39:55.467 +05:00 [DBG] No candidates found for the request path '/swagger/v1/swagger.json'
+2023-12-01 14:39:55.469 +05:00 [INF] HTTP GET /swagger/swagger-ui.css responded 200 in 184.8268 ms
+2023-12-01 14:39:55.475 +05:00 [DBG] Request did not match any endpoints
+2023-12-01 14:39:55.478 +05:00 [DBG] Request did not match any endpoints
+2023-12-01 14:39:55.483 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/swagger-ui.css - - - 0 144929 text/css 387.7677ms
+2023-12-01 14:39:55.613 +05:00 [DBG] The file transmission was cancelled
+System.OperationCanceledException: The operation was canceled.
+   at System.Threading.CancellationToken.ThrowOperationCanceledException()
+   at System.Threading.CancellationToken.ThrowIfCancellationRequested()
+   at Microsoft.AspNetCore.Http.SendFileResponseExtensions.SendFileAsyncCore(HttpResponse response, IFileInfo file, Int64 offset, Nullable`1 count, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Http.SendFileResponseExtensions.SendFileAsyncCore(HttpResponse response, IFileInfo file, Int64 offset, Nullable`1 count, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.StaticFiles.StaticFileContext.SendAsync()
+2023-12-01 14:39:55.623 +05:00 [INF] Sending file. Request path: '/favicon-16x16.png'. Physical path: 'N/A'
+2023-12-01 14:39:55.625 +05:00 [INF] HTTP GET /swagger/favicon-16x16.png responded 200 in 131.7455 ms
+2023-12-01 14:39:55.628 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/favicon-16x16.png - - - 0 665 image/png 204.1165ms
+2023-12-01 14:39:55.717 +05:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 141.7135 ms
+2023-12-01 14:39:55.719 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - - - 200 - application/json;charset=utf-8 276.8593ms
+2023-12-01 14:41:02.566 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/WeatherForecast - -
+2023-12-01 14:41:02.578 +05:00 [DBG] 1 candidate(s) found for the request path '/WeatherForecast'
+2023-12-01 14:41:02.586 +05:00 [DBG] Endpoint 'FixEngine.Controllers.WeatherForecastController.Get (FixEngine)' with route pattern 'WeatherForecast' is valid for the request path '/WeatherForecast'
+2023-12-01 14:41:02.588 +05:00 [DBG] Request matched endpoint 'FixEngine.Controllers.WeatherForecastController.Get (FixEngine)'
+2023-12-01 14:41:02.590 +05:00 [DBG] Static files was skipped as the request already matched an endpoint.
+2023-12-01 14:41:02.594 +05:00 [INF] Executing endpoint 'FixEngine.Controllers.WeatherForecastController.Get (FixEngine)'
+2023-12-01 14:41:02.635 +05:00 [INF] Route matched with {action = "Get", controller = "WeatherForecast"}. Executing controller action with signature System.Collections.Generic.IEnumerable`1[FixEngine.WeatherForecast] Get() on controller FixEngine.Controllers.WeatherForecastController (FixEngine).
+2023-12-01 14:41:02.640 +05:00 [DBG] Execution plan of authorization filters (in the following order): ["None"]
+2023-12-01 14:41:02.642 +05:00 [DBG] Execution plan of resource filters (in the following order): ["None"]
+2023-12-01 14:41:02.644 +05:00 [DBG] Execution plan of action filters (in the following order): ["Microsoft.AspNetCore.Mvc.ModelBinding.UnsupportedContentTypeFilter (Order: -3000)","Microsoft.AspNetCore.Mvc.Infrastructure.ModelStateInvalidFilter (Order: -2000)"]
+2023-12-01 14:41:02.648 +05:00 [DBG] Execution plan of exception filters (in the following order): ["None"]
+2023-12-01 14:41:02.650 +05:00 [DBG] Execution plan of result filters (in the following order): ["Microsoft.AspNetCore.Mvc.Infrastructure.ClientErrorResultFilter (Order: -2000)"]
+2023-12-01 14:41:02.657 +05:00 [DBG] Executing controller factory for controller FixEngine.Controllers.WeatherForecastController (FixEngine)
+2023-12-01 14:41:02.659 +05:00 [DBG] Executed controller factory for controller FixEngine.Controllers.WeatherForecastController (FixEngine)
+2023-12-01 14:41:02.661 +05:00 [INF] Fetching weather
+2023-12-01 14:41:02.666 +05:00 [DBG] List of registered output formatters, in the following order: ["Microsoft.AspNetCore.Mvc.Formatters.HttpNoContentOutputFormatter","Microsoft.AspNetCore.Mvc.Formatters.StringOutputFormatter","Microsoft.AspNetCore.Mvc.Formatters.StreamOutputFormatter","Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonOutputFormatter"]
+2023-12-01 14:41:02.673 +05:00 [DBG] Attempting to select an output formatter based on Accept header '["text/plain"]'.
+2023-12-01 14:41:02.675 +05:00 [DBG] Could not find an output formatter based on content negotiation. Accepted types were (["text/plain"])
+2023-12-01 14:41:02.677 +05:00 [DBG] Attempting to select an output formatter without using a content type as no explicit content types were specified for the response.
+2023-12-01 14:41:02.678 +05:00 [DBG] Attempting to select the first formatter in the output formatters list which can write the result.
+2023-12-01 14:41:02.692 +05:00 [DBG] Selected output formatter 'Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonOutputFormatter' and content type 'application/json' to write the response.
+2023-12-01 14:41:02.694 +05:00 [INF] Executing ObjectResult, writing value of type 'FixEngine.WeatherForecast[]'.
+2023-12-01 14:41:02.719 +05:00 [INF] Executed action FixEngine.Controllers.WeatherForecastController.Get (FixEngine) in 60.6222ms
+2023-12-01 14:41:02.721 +05:00 [INF] Executed endpoint 'FixEngine.Controllers.WeatherForecastController.Get (FixEngine)'
+2023-12-01 14:41:02.723 +05:00 [INF] HTTP GET /WeatherForecast responded 200 in 133.0649 ms
+2023-12-01 14:41:02.725 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/WeatherForecast - - - 200 - application/json;+charset=utf-8 158.9373ms
+2023-12-01 14:42:34.616 +05:00 [DBG] Hosting starting
+2023-12-01 14:42:34.878 +05:00 [INF] Now listening on: https://localhost:7261
+2023-12-01 14:42:34.881 +05:00 [INF] Now listening on: http://localhost:5116
+2023-12-01 14:42:34.883 +05:00 [INF] Application started. Press Ctrl+C to shut down.
+2023-12-01 14:42:34.883 +05:00 [INF] Hosting environment: Development
+2023-12-01 14:42:34.884 +05:00 [INF] Content root path: B:\Exinitic\FixEngine\FixEngine\FixEngine
+2023-12-01 14:42:34.885 +05:00 [DBG] Hosting started
+2023-12-01 14:42:36.210 +05:00 [INF] HTTP GET /swagger/index.html responded 200 in 305.4025 ms
+2023-12-01 14:42:36.407 +05:00 [INF] HTTP GET /swagger/swagger-ui.css responded 200 in 157.3358 ms
+2023-12-01 14:42:36.574 +05:00 [INF] HTTP GET /swagger/favicon-16x16.png responded 200 in 133.4745 ms
+2023-12-01 14:42:36.686 +05:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 157.1581 ms
+2023-12-01 14:45:27.649 +05:00 [DBG] Hosting starting
+2023-12-01 14:45:27.932 +05:00 [INF] Now listening on: https://localhost:7261
+2023-12-01 14:45:27.935 +05:00 [INF] Now listening on: http://localhost:5116
+2023-12-01 14:45:27.936 +05:00 [INF] Application started. Press Ctrl+C to shut down.
+2023-12-01 14:45:27.938 +05:00 [INF] Hosting environment: Development
+2023-12-01 14:45:27.938 +05:00 [INF] Content root path: B:\Exinitic\FixEngine\FixEngine\FixEngine
+2023-12-01 14:45:27.939 +05:00 [DBG] Hosting started
+2023-12-01 14:45:28.895 +05:00 [INF] HTTP GET /swagger/index.html responded 200 in 278.4660 ms
+2023-12-01 14:45:29.113 +05:00 [INF] HTTP GET /swagger/swagger-ui.css responded 200 in 150.8035 ms
+2023-12-01 14:45:29.310 +05:00 [INF] HTTP GET /swagger/favicon-16x16.png responded 200 in 149.4458 ms
+2023-12-01 14:45:29.424 +05:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 113.9659 ms
+2023-12-01 14:46:11.649 +05:00 [DBG] Hosting starting
+2023-12-01 14:46:12.139 +05:00 [INF] Now listening on: https://localhost:7261
+2023-12-01 14:46:12.141 +05:00 [INF] Now listening on: http://localhost:5116
+2023-12-01 14:46:12.143 +05:00 [INF] Application started. Press Ctrl+C to shut down.
+2023-12-01 14:46:12.144 +05:00 [INF] Hosting environment: Development
+2023-12-01 14:46:12.145 +05:00 [INF] Content root path: B:\Exinitic\FixEngine\FixEngine\FixEngine
+2023-12-01 14:46:12.147 +05:00 [DBG] Hosting started
+2023-12-01 14:46:13.269 +05:00 [INF] HTTP GET /swagger/index.html responded 200 in 290.2225 ms
+2023-12-01 14:46:13.558 +05:00 [INF] HTTP GET /swagger/swagger-ui.css responded 200 in 193.7215 ms
+2023-12-01 14:46:13.788 +05:00 [INF] HTTP GET /swagger/favicon-16x16.png responded 200 in 136.3616 ms
+2023-12-01 14:46:13.913 +05:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 227.5522 ms
+2023-12-01 14:46:35.067 +05:00 [INF] Now listening on: https://localhost:7261
+2023-12-01 14:46:35.101 +05:00 [INF] Now listening on: http://localhost:5116
+2023-12-01 14:46:35.104 +05:00 [INF] Application started. Press Ctrl+C to shut down.
+2023-12-01 14:46:35.106 +05:00 [INF] Hosting environment: Development
+2023-12-01 14:46:35.106 +05:00 [INF] Content root path: B:\Exinitic\FixEngine\FixEngine\FixEngine
+2023-12-01 14:46:36.086 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/index.html - -
+2023-12-01 14:46:36.475 +05:00 [INF] HTTP GET /swagger/index.html responded 200 in 328.4971 ms
+2023-12-01 14:46:36.522 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/index.html - - - 200 - text/html;charset=utf-8 439.9663ms
+2023-12-01 14:46:36.540 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/swagger-ui.css - -
+2023-12-01 14:46:36.541 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_vs/browserLink - -
+2023-12-01 14:46:36.541 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - -
+2023-12-01 14:46:36.557 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - - - 200 12350 application/javascript;+charset=utf-8 15.0933ms
+2023-12-01 14:46:36.713 +05:00 [INF] Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+2023-12-01 14:46:36.720 +05:00 [INF] HTTP GET /swagger/swagger-ui.css responded 200 in 175.1252 ms
+2023-12-01 14:46:36.723 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/swagger-ui.css - - - 0 144929 text/css 183.2832ms
+2023-12-01 14:46:36.722 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_vs/browserLink - - - 200 - text/javascript;+charset=UTF-8 181.0721ms
+2023-12-01 14:46:36.743 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/favicon-16x16.png - -
+2023-12-01 14:46:36.782 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - -
+2023-12-01 14:46:36.905 +05:00 [INF] Sending file. Request path: '/favicon-16x16.png'. Physical path: 'N/A'
+2023-12-01 14:46:36.906 +05:00 [INF] HTTP GET /swagger/favicon-16x16.png responded 200 in 157.9531 ms
+2023-12-01 14:46:36.908 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/favicon-16x16.png - - - 0 665 image/png 165.5239ms
+2023-12-01 14:46:37.008 +05:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 177.0397 ms
+2023-12-01 14:46:37.014 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - - - 200 - application/json;charset=utf-8 232.3648ms
+2023-12-01 14:47:48.333 +05:00 [INF] Now listening on: https://localhost:7261
+2023-12-01 14:47:48.367 +05:00 [INF] Now listening on: http://localhost:5116
+2023-12-01 14:47:48.370 +05:00 [INF] Application started. Press Ctrl+C to shut down.
+2023-12-01 14:47:48.371 +05:00 [INF] Hosting environment: Development
+2023-12-01 14:47:48.372 +05:00 [INF] Content root path: B:\Exinitic\FixEngine\FixEngine\FixEngine
+2023-12-01 14:47:49.119 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/index.html - -
+2023-12-01 14:47:49.552 +05:00 [INF] HTTP GET /swagger/index.html responded 200 in 376.4550 ms
+2023-12-01 14:47:49.672 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/swagger-ui.css - -
+2023-12-01 14:47:49.676 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - -
+2023-12-01 14:47:49.677 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_vs/browserLink - -
+2023-12-01 14:47:49.689 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/index.html - - - 200 - text/html;charset=utf-8 573.0533ms
+2023-12-01 14:47:49.805 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - - - 200 12350 application/javascript;+charset=utf-8 128.8499ms
+2023-12-01 14:47:49.885 +05:00 [INF] Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+2023-12-01 14:47:49.886 +05:00 [INF] HTTP GET /swagger/swagger-ui.css responded 200 in 202.5751 ms
+2023-12-01 14:47:49.889 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/swagger-ui.css - - - 0 144929 text/css 217.1960ms
+2023-12-01 14:47:49.891 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_vs/browserLink - - - 200 - text/javascript;+charset=UTF-8 213.6165ms
+2023-12-01 14:47:49.901 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/favicon-16x16.png - -
+2023-12-01 14:47:50.025 +05:00 [INF] Sending file. Request path: '/favicon-16x16.png'. Physical path: 'N/A'
+2023-12-01 14:47:50.025 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - -
+2023-12-01 14:47:50.026 +05:00 [INF] HTTP GET /swagger/favicon-16x16.png responded 200 in 122.5375 ms
+2023-12-01 14:47:50.033 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/favicon-16x16.png - - - 0 665 image/png 131.1823ms
+2023-12-01 14:47:50.135 +05:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 108.2342 ms
+2023-12-01 14:47:50.137 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - - - 200 - application/json;charset=utf-8 111.9537ms
+2023-12-01 14:48:30.010 +05:00 [INF] Now listening on: https://localhost:7261
+2023-12-01 14:48:30.048 +05:00 [INF] Now listening on: http://localhost:5116
+2023-12-01 14:48:30.052 +05:00 [INF] Application started. Press Ctrl+C to shut down.
+2023-12-01 14:48:30.054 +05:00 [INF] Hosting environment: Development
+2023-12-01 14:48:30.055 +05:00 [INF] Content root path: B:\Exinitic\FixEngine\FixEngine\FixEngine
+2023-12-01 14:48:30.888 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/index.html - -
+2023-12-01 14:48:31.288 +05:00 [INF] HTTP GET /swagger/index.html responded 200 in 327.6912 ms
+2023-12-01 14:48:31.356 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/index.html - - - 200 - text/html;charset=utf-8 470.8701ms
+2023-12-01 14:48:31.379 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/swagger-ui.css - -
+2023-12-01 14:48:31.379 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_vs/browserLink - -
+2023-12-01 14:48:31.381 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - -
+2023-12-01 14:48:31.623 +05:00 [INF] Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+2023-12-01 14:48:31.624 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - - - 200 12350 application/javascript;+charset=utf-8 242.8343ms
+2023-12-01 14:48:31.629 +05:00 [INF] HTTP GET /swagger/swagger-ui.css responded 200 in 210.1495 ms
+2023-12-01 14:48:31.634 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/swagger-ui.css - - - 0 144929 text/css 255.1510ms
+2023-12-01 14:48:31.637 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_vs/browserLink - - - 200 - text/javascript;+charset=UTF-8 257.0833ms
+2023-12-01 14:48:31.656 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/favicon-16x16.png - -
+2023-12-01 14:48:31.776 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - -
+2023-12-01 14:48:31.793 +05:00 [INF] Sending file. Request path: '/favicon-16x16.png'. Physical path: 'N/A'
+2023-12-01 14:48:31.795 +05:00 [INF] HTTP GET /swagger/favicon-16x16.png responded 200 in 136.0967 ms
+2023-12-01 14:48:31.796 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/favicon-16x16.png - - - 0 665 image/png 139.9313ms
+2023-12-01 14:48:31.905 +05:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 110.7993 ms
+2023-12-01 14:48:31.907 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - - - 200 - application/json;charset=utf-8 130.4659ms
+2023-12-01 14:49:27.712 +05:00 [INF] Now listening on: https://localhost:7261
+2023-12-01 14:49:27.753 +05:00 [INF] Now listening on: http://localhost:5116
+2023-12-01 14:49:27.757 +05:00 [INF] Application started. Press Ctrl+C to shut down.
+2023-12-01 14:49:27.758 +05:00 [INF] Hosting environment: Development
+2023-12-01 14:49:27.759 +05:00 [INF] Content root path: B:\Exinitic\FixEngine\FixEngine\FixEngine
+2023-12-01 14:49:28.763 +05:00 [INF] HTTP GET /swagger/index.html responded 200 in 326.3788 ms
+2023-12-01 14:49:28.955 +05:00 [INF] HTTP GET /swagger/swagger-ui.css responded 200 in 132.8321 ms
+2023-12-01 14:49:29.175 +05:00 [INF] HTTP GET /swagger/favicon-16x16.png responded 200 in 143.9601 ms
+2023-12-01 14:49:29.300 +05:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 125.2931 ms
+2023-12-01 14:49:56.367 +05:00 [INF] Fetching weather
+2023-12-01 14:49:56.397 +05:00 [INF] HTTP GET /WeatherForecast responded 200 in 59.3852 ms
+2023-12-01 14:56:43.135 +05:00 [INF] Now listening on: https://localhost:7261
+2023-12-01 14:56:43.169 +05:00 [INF] Now listening on: http://localhost:5116
+2023-12-01 14:56:43.173 +05:00 [INF] Application started. Press Ctrl+C to shut down.
+2023-12-01 14:56:43.174 +05:00 [INF] Hosting environment: Development
+2023-12-01 14:56:43.175 +05:00 [INF] Content root path: B:\Exinitic\FixEngine\FixEngine\FixEngine
+2023-12-01 14:56:43.835 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/index.html - -
+2023-12-01 14:56:44.185 +05:00 [INF] HTTP GET /swagger/index.html responded 200 in 287.9068 ms
+2023-12-01 14:56:44.205 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/index.html - - - 200 - text/html;charset=utf-8 369.8573ms
+2023-12-01 14:56:44.256 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/swagger-ui.css - -
+2023-12-01 14:56:44.257 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_vs/browserLink - -
+2023-12-01 14:56:44.257 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - -
+2023-12-01 14:56:44.279 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - - - 200 12350 application/javascript;+charset=utf-8 22.2004ms
+2023-12-01 14:56:44.432 +05:00 [INF] Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+2023-12-01 14:56:44.434 +05:00 [INF] HTTP GET /swagger/swagger-ui.css responded 200 in 174.8164 ms
+2023-12-01 14:56:44.438 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/swagger-ui.css - - - 0 144929 text/css 181.5648ms
+2023-12-01 14:56:44.441 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_vs/browserLink - - - 200 - text/javascript;+charset=UTF-8 183.2658ms
+2023-12-01 14:56:44.509 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - -
+2023-12-01 14:56:44.682 +05:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 169.2298 ms
+2023-12-01 14:56:44.695 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - - - 200 - application/json;charset=utf-8 186.0959ms
+2023-12-01 14:57:16.026 +05:00 [INF] Now listening on: https://localhost:7261
+2023-12-01 14:57:16.061 +05:00 [INF] Now listening on: http://localhost:5116
+2023-12-01 14:57:16.066 +05:00 [INF] Application started. Press Ctrl+C to shut down.
+2023-12-01 14:57:16.067 +05:00 [INF] Hosting environment: Development
+2023-12-01 14:57:16.068 +05:00 [INF] Content root path: B:\Exinitic\FixEngine\FixEngine\FixEngine
+2023-12-01 14:57:16.835 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/index.html - -
+2023-12-01 14:57:17.210 +05:00 [INF] HTTP GET /swagger/index.html responded 200 in 321.2637 ms
+2023-12-01 14:57:17.328 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_vs/browserLink - -
+2023-12-01 14:57:17.329 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - -
+2023-12-01 14:57:17.352 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/index.html - - - 200 - text/html;charset=utf-8 512.6066ms
+2023-12-01 14:57:17.357 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_framework/aspnetcore-browser-refresh.js - - - 200 12350 application/javascript;+charset=utf-8 28.4729ms
+2023-12-01 14:57:17.392 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/_vs/browserLink - - - 200 - text/javascript;+charset=UTF-8 63.2649ms
+2023-12-01 14:57:17.549 +05:00 [INF] Request starting HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - -
+2023-12-01 14:57:17.762 +05:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 169.1270 ms
+2023-12-01 14:57:17.764 +05:00 [INF] Request finished HTTP/2 GET https://localhost:7261/swagger/v1/swagger.json - - - 200 - application/json;charset=utf-8 215.6359ms
+2023-12-01 14:57:48.104 +05:00 [INF] Now listening on: https://localhost:7261
+2023-12-01 14:57:48.158 +05:00 [INF] Now listening on: http://localhost:5116
+2023-12-01 14:57:48.163 +05:00 [INF] Application started. Press Ctrl+C to shut down.
+2023-12-01 14:57:48.165 +05:00 [INF] Hosting environment: Development
+2023-12-01 14:57:48.166 +05:00 [INF] Content root path: B:\Exinitic\FixEngine\FixEngine\FixEngine
+2023-12-01 14:57:49.532 +05:00 [INF] HTTP GET /swagger/index.html responded 200 in 426.9194 ms
+2023-12-01 14:57:50.107 +05:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 135.7117 ms
+2023-12-01 14:57:56.474 +05:00 [INF] Fetching weather
+2023-12-01 14:57:56.496 +05:00 [INF] HTTP GET /WeatherForecast responded 200 in 53.5978 ms

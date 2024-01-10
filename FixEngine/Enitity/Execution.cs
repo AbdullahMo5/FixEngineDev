@@ -14,6 +14,7 @@ namespace FixEngine.Enitity
         [Column(TypeName = "varchar(200)")]
         [Required]
         public string OrderId { get; set; }
+        [Column(TypeName = "varchar(200)")]
         public string PosId { get; set; }
         [Column(TypeName = "varchar(200)")]
         public string ClOrdId { get; set; }

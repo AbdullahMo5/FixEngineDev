@@ -49,6 +49,7 @@ namespace FixEngine.Hubs
         }
         public async Task ConnectCtrader()
         {
+            /*//acc1
             ApiCredentials apiCredentials = new ApiCredentials(
                 QuoteHost: "h74.p.ctrader.com",
                 TradeHost: "h74.p.ctrader.com",
@@ -63,6 +64,23 @@ namespace FixEngine.Hubs
                 QuoteTargetSubId: "QUOTE",
                 TradeTargetSubId: "TRADE",
                 Username: "3873996",
+                Password: "Gtlfx125");
+            */
+            //acc2
+            ApiCredentials apiCredentials = new ApiCredentials(
+                QuoteHost: "h74.p.ctrader.com",
+                TradeHost: "h74.p.ctrader.com",
+                QuotePort: 5201,
+                TradePort: 5202,
+                QuoteSenderCompId: "demo.ctrader.4024137",
+                TradeSenderCompId: "demo.ctrader.4024137",
+                QuoteSenderSubId: "4024137" + Context.ConnectionId.ToString(),
+                TradeSenderSubId: "4024137" + Context.ConnectionId.ToString(),
+                QuoteTargetCompId: "cServer",
+                TradeTargetCompId: "cServer",
+                QuoteTargetSubId: "QUOTE",
+                TradeTargetSubId: "TRADE",
+                Username: "4024137",
                 Password: "Gtlfx125");
             _logger.LogInformation("Connecting... |"+ Context.ConnectionId.ToString());
             _apiService.ConnectClient(apiCredentials, Context.ConnectionId);
@@ -124,23 +142,22 @@ namespace FixEngine.Hubs
                 _logger.LogInformation("Client not found."); 
             }
         }
-        public void SendCloseOrderRequest(NewOrderRequestParameters parameters)
+        public void SendCloseOrderRequest(string positionId)
         {
             _logger.LogInformation("Close order request ");
             var client = _apiService.GetClient(Context.ConnectionId);
             if(client != null)
             {
                 //fetch from db
-                string ?posId = parameters.PositionId.ToString();
-                if (!string.IsNullOrEmpty(posId))
+                if (!string.IsNullOrEmpty(positionId))
                 {
-                    Enitity.Execution ? execution =_executionService.FetchByPositionId(posId);
+                    Enitity.Execution ? execution =_executionService.FetchByPositionId(positionId);
                     if (execution != null)
                     {
                         DateTime currentTime = DateTime.UtcNow;
                         long unixTime = ((DateTimeOffset)currentTime).ToUnixTimeSeconds();
                         _logger.LogInformation("Sending order cancel request");
-                        client.SendOrderCancelRequest(new OrderCancelRequestParameters(OrigClOrderId: execution.ClOrdId, OrderId: posId, ClOrdId: "" + unixTime));
+                       client.SendOrderCancelRequest(new OrderCancelRequestParameters(OrigClOrderId: execution.ClOrdId, OrderId: execution.OrderId, ClOrdId: "" + unixTime));
                     }
 
                 }

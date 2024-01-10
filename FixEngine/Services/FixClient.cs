@@ -160,6 +160,16 @@ namespace FixEngine.Services
         {
             Console.WriteLine("Received positions");
             Console.WriteLine(positionReport.ToString());
+            if(positionReport.IsSetField(728) && positionReport.GetInt(728) == 2)
+            {
+                Console.WriteLine("No open positions");
+                Position position1 = new Position()
+                {
+                    Index = -1,
+                    IsEmpty = true
+                };
+                await PositionReportChannel.Writer.WriteAsync(position1);
+            }
             if (positionReport.TotalNumPosReports.getValue() == 0) return;
 
             var position = positionReport.GetPosition();
@@ -171,6 +181,7 @@ namespace FixEngine.Services
             }
             position.Index = positionsCount+1;
             positionsCount++;
+            position.IsEmpty = false;
             Console.WriteLine("Positions Count = > "+positionsCount);
             await PositionReportChannel.Writer.WriteAsync(position);
         }

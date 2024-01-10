@@ -361,3 +361,10 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+#logs
+Logs/
+store/
+*.logs
+*.log
+/FixEngine/all-20231201.logs

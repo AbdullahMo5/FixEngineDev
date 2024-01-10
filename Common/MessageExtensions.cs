@@ -287,6 +287,7 @@ namespace Common
         public string StopLossTriggerMethod { get; init; }
 
         public bool? GuaranteedStopLoss { get; init; }
+        public bool IsEmpty { get; set; }
     }
 
     public record Order

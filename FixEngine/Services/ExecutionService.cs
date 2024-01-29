@@ -1,5 +1,5 @@
 ﻿using FixEngine.Data;
-using FixEngine.Enitity;
+using FixEngine.Entity;
 
 namespace Services
 {

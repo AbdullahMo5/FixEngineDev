@@ -1,4 +1,4 @@
-﻿using FixEngine.Enitity;
+﻿using FixEngine.Entity;
 using FixEngine.Services;
 using Services;
 using System.ComponentModel.DataAnnotations.Schema;

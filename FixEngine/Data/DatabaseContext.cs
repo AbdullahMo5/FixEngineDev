@@ -1,4 +1,4 @@
-﻿using FixEngine.Enitity;
+﻿using FixEngine.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace FixEngine.Data
@@ -10,6 +10,7 @@ namespace FixEngine.Data
                 
         }
         public DbSet<Execution> executions { get; set; }
+        public DbSet<User> users { get; set; }
     
     }
 }

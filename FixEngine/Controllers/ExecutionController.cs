@@ -3,7 +3,7 @@ using Services;
 
 namespace FixEngine.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/secure/[controller]")]
     [ApiController]
     public class ExecutionController : ControllerBase
     {

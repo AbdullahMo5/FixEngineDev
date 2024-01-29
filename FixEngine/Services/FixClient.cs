@@ -51,6 +51,7 @@ namespace FixEngine.Services
         public Channel<Log> LogsChannel { get; } = Channel.CreateUnbounded<Log>();
 
         public Channel<ExecutionReport> ExecutionReportChannel { get; } = Channel.CreateUnbounded<ExecutionReport>();
+        public Channel<ExecutionReport> OrdersExecutionReportChannel { get; } = Channel.CreateUnbounded<ExecutionReport>();
 
         public Channel<Position> PositionReportChannel { get; } = Channel.CreateUnbounded<Position>();
         public Channel<SymbolQuote> MarketDataSnapshotFullRefreshChannel { get; } = Channel.CreateUnbounded<SymbolQuote>();
@@ -85,14 +86,63 @@ namespace FixEngine.Services
         {
             if (message is QuickFix.FIX44.MarketDataRequest) return;
 
-            await LogsChannel.Writer.WriteAsync(new("Sent", DateTimeOffset.UtcNow, message.ToString('|')));
+            await LogsChannel.Writer.WriteAsync(new("Sent", GetMessageTypeString(message), DateTimeOffset.UtcNow, message.ToString('|')));
+        }
+        private string GetMessageTypeString(QuickFix.Message message)
+        {
+            string type = "";
+            switch (message)
+            {
+                case QuickFix.FIX44.Heartbeat:
+                    type = "HEARTBEAT";
+                    break;
+                case QuickFix.FIX44.Logon:
+                    type = "LOGIN";
+                    break;
+                case QuickFix.FIX44.Logout:
+                    type = "LOGOUT";
+                    break;
+                case QuickFix.FIX44.SecurityListRequest:
+                    type = "SECURITY LIST REQUEST";
+                    break;
+                case QuickFix.FIX44.SecurityList :
+                    type= "SECURITY LIST";
+                    break;
+                case QuickFix.FIX44.MarketDataRequest:
+                    type = "MARKET DATA REQUEST";
+                    break;
+                case QuickFix.FIX44.MarketDataSnapshotFullRefresh:
+                    type = "MARKET DATA";
+                    break;
+                case QuickFix.FIX44.OrderMassStatusRequest:
+                    type = "ORDER STATUS REQUEST";
+                    break;
+                case QuickFix.FIX44.RequestForPositions:
+                    type = "POSITION REQUEST";
+                    break;
+                case QuickFix.FIX44.PositionReport:
+                    type = "POSITION REPORT";
+                    break;
+                case QuickFix.FIX44.ExecutionReport:
+                    type = "EXECUTION REPORT";
+                    break;
+                case QuickFix.FIX44.BusinessMessageReject:
+                    type = "BUSINESS REJECT";
+                    break; 
+                case QuickFix.FIX44.NewOrderSingle:
+                    type = "NEW ORDER REQUEST";
+                    break;
+                default:
+                    break;
+            }
+            return type;
         }
 
         private async Task ProcessIncomingMessage(QuickFix.Message message)
         {
             if (message is not QuickFix.FIX44.MarketDataSnapshotFullRefresh)
             {
-                await LogsChannel.Writer.WriteAsync(new("Received", DateTimeOffset.UtcNow, message.ToString('|')));
+                await LogsChannel.Writer.WriteAsync(new("Received", GetMessageTypeString(message), DateTimeOffset.UtcNow, message.ToString('|')));
             }
 
             if (message is QuickFix.FIX44.Logon && message.Header.IsSetField(50) && message.Header.GetString(50).Equals("TRADE", StringComparison.OrdinalIgnoreCase) && _tradeInitiator.IsLoggedOn)
@@ -145,14 +195,16 @@ namespace FixEngine.Services
                 Console.WriteLine("Requesting for positions");
                 SendPositionsRequest();
             }
+            //pending orders
             else if (order.Type.Equals("Market", StringComparison.OrdinalIgnoreCase) is false)
             {
                 order.SymbolName = _symbols.FirstOrDefault(symbol => symbol.Id == order.SymbolId)?.Name;
-
-                /*char executionType = executionReport.ExecType.getValue();
+                char executionType = executionReport.ExecType.getValue();
                 string clOrderId = executionReport.ClOrdID.getValue();
-                string execId = executionReport.ExecID.getValue();
-                await ExecutionReportChannel.Writer.WriteAsync(new(execId, executionType, order, clOrderId));*/
+                string execId = executionReport.IsSetField(17) ? executionReport.GetString(17) : string.Empty;
+
+                //if (executionType != '4' && executionType != '8' && executionType != 'C' && executionType != 'F')
+                await OrdersExecutionReportChannel.Writer.WriteAsync(new(execId, executionType, order, clOrderId));
             }
         }
 
@@ -241,7 +293,7 @@ namespace FixEngine.Services
             {
                 message.Set(new TimeInForce('1'));
 
-                if (parameters.TargetPrice.HasValue)
+                if (parameters.TargetPrice > 0)
                 {
                     if (ordType.getValue() == OrdType.LIMIT)
                     {
@@ -271,6 +323,42 @@ namespace FixEngine.Services
             if (string.IsNullOrWhiteSpace(parameters.Designation) is false)
             {
                 message.Set(new Designation(parameters.Designation));
+            }
+
+            message.Header.GetString(Tags.BeginString);
+
+            _tradeApp.SendMessage(message);
+        }
+        public void SendOrderAmmendRequest(OrderAmmendRequest parameters)
+        {
+            Console.WriteLine("Recvd order ammend request. Sending order");
+            var ordType = new OrdType(parameters.OrderType.ToLowerInvariant() switch
+            {
+                "market" => OrdType.MARKET,
+                "limit" => OrdType.LIMIT,
+                "stop" => OrdType.STOP,
+                _ => throw new Exception("unsupported input"),
+            });
+            DateTime currentTime = DateTime.UtcNow;
+            long unixTime = ((DateTimeOffset)currentTime).ToUnixTimeSeconds();
+
+            var message = new QuickFix.FIX44.OrderCancelReplaceRequest();
+            Console.WriteLine("OrigCLOrdID => ", parameters.ClOrderId);
+            message.Set(new OrigClOrdID(parameters.ClOrderId));
+            message.Set(new ClOrdID(unixTime.ToString()));
+            message.Set(new OrderID(parameters.OrderId));
+            message.Set(new OrderQty(parameters.OrderQty));
+            if (ordType.getValue() == OrdType.LIMIT)
+            {
+                message.Set(new Price(Convert.ToDecimal(parameters.TargetPrice)));
+            }
+            else
+            {
+                message.Set(new StopPx(Convert.ToDecimal(parameters.TargetPrice)));
+            }
+            if (parameters.Expiry.HasValue)
+            {
+                message.Set(new ExpireTime(parameters.Expiry.Value));
             }
 
             message.Header.GetString(Tags.BeginString);
@@ -314,7 +402,7 @@ namespace FixEngine.Services
             message.PosReqID = new PosReqID("Positions");
 
             _tradeApp.SendMessage(message);
-        }
+        }        
 
         private void SendMarketDataRequest(bool subscribe, int symbolId)
         {
@@ -341,13 +429,13 @@ namespace FixEngine.Services
 
     public record ApiCredentials(string QuoteHost, string TradeHost, int QuotePort, int TradePort, string QuoteSenderCompId, string TradeSenderCompId, string QuoteSenderSubId, string TradeSenderSubId, string QuoteTargetCompId, string TradeTargetCompId, string QuoteTargetSubId, string TradeTargetSubId, string Username, string Password);
 
-    public record Log(string Type, DateTimeOffset Time, string Message);
+    public record Log(string Type, string MessageType, DateTimeOffset Time, string Message);
 
     public record ExecutionReport(string ExecId, char Type, Order Order, string ClOrderId);
 
-    public record NewOrderRequestParameters(string Type, string ClOrdId, int SymbolId, string TradeSide, decimal Quantity)
+    public record NewOrderRequestParameters(string Type, string ClOrdId, int SymbolId, string TradeSide, decimal Quantity, decimal TargetPrice)
     {
-        public double? TargetPrice { get; init; }
+        //public double TargetPrice { get; init; }
 
         public DateTime? Expiry { get; init; }
 
@@ -355,7 +443,7 @@ namespace FixEngine.Services
 
         public string Designation { get; init; }
     }
-    
+    public record OrderAmmendRequest(string ClOrderId, string OrderType,string ? OrderId, decimal OrderQty, decimal TargetPrice, DateTime? Expiry);
     public record OrderCancelRequestParameters(string OrigClOrderId, string OrderId, string ClOrdId);
 }
 

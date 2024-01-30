@@ -21,8 +21,12 @@ namespace FixEngine.Controllers
         public async Task<ActionResult<string>> CreateUser([FromBody] CreateUserRequestModel user)
         {
             //TODO validation
-            _service.AddUser(user);
-            return Ok();
+            bool status = _service.AddUser(user);
+            if (!status)
+            {
+                return BadRequest("User already exists");
+            }
+            return Ok("User created sucessfully");
         }
         [HttpGet("GetUser")]
         public async Task<ActionResult<string>> GetUser([FromQuery] string email)

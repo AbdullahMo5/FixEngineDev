@@ -37,13 +37,14 @@ namespace FixEngine.Services
         }
         public void UpdateUser(Models.User user) { }
         public void DeleteUser(Models.User user) { }
-        public void AddUser(CreateUserRequestModel user) {
+        public bool AddUser(CreateUserRequestModel user) {
+
             bool isExist = _context.users.Any(x => x.Email == user.Email);
             if(isExist)
             {
                 string message = $"User with email {user.Email} already exists";
                 _logger.LogError(message);
-                return;
+                return false;
             }
             var newUser = new Entity.User()
             {
@@ -52,8 +53,10 @@ namespace FixEngine.Services
                 LastName = user.LastName,
                 Password = user.Password
             };
+            _logger.LogInformation("Createing user: ", user.FirstName);
             _context.users.Add(newUser);
             _context.SaveChanges();
+            return true;
         }
     }
 }

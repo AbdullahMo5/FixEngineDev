@@ -253,7 +253,7 @@ namespace FixEngine.Services
 
             SendPositionsRequest();
             SendOrderMassStatusRequest();
-            int limit = _symbols.Length > 20 ? 20 : _symbols.Length;
+            int limit = _symbols.Length > 100 ? 100 : _symbols.Length;
             for(int i = 0; i < limit; i++) {
 
                 await SecurityChannel.Writer.WriteAsync(_symbols[i]);

@@ -74,12 +74,13 @@ namespace FixEngine.Hubs
             _logger.LogInformation("Connecting with token => ", token);
             if (string.IsNullOrEmpty(token)) {
                 _logger.LogError("Connecting failed. Reason: Token is null or empty");
-                return;
+                await Clients.Caller.SendAsync("Disconnected");
             }
             bool sessionValid = _sessionManager.IsExist(token);
             if(!sessionValid)
             {
                 _logger.LogError("Client FIX Connection failed. Reason: Invalid session token");
+                await Clients.Caller.SendAsync("Disconnected");
                 return;
             }
             var client = _apiService.GetClient(token);
@@ -128,9 +129,11 @@ namespace FixEngine.Hubs
                 client.Dispose();
                 _logger.LogInformation($"{/*Context.ConnectionId.ToString()*/token}- Client Disposed");
                 _logger.LogInformation("Disconnected succcessfully");
+                await Clients.Caller.SendAsync("Disconnected");
                 return ;
             }
             _logger.LogInformation($"Client: {/*Context.ConnectionId.ToString()*/ token} not found");
+            await Clients.Caller.SendAsync("Disconnected");
 
         }
 
@@ -151,6 +154,7 @@ namespace FixEngine.Hubs
             }
             else
                 _logger.LogInformation($"Client: {Context.ConnectionId.ToString()} not found");*/
+            Clients.Caller.SendAsync("Disconnected");
             return base.OnDisconnectedAsync(exception);
         }
 
@@ -252,6 +256,7 @@ namespace FixEngine.Hubs
         }
         public async IAsyncEnumerable<Position> Positions(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Positions Token => ", token);
             var client = _apiService.GetClient(/*Context.ConnectionId*/token);
             if(client != null )
             {
@@ -283,6 +288,7 @@ namespace FixEngine.Hubs
         } 
         public async IAsyncEnumerable<ExecutionReport> Orders(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Orders Token => ", token);
             var client = _apiService.GetClient(/*Context.ConnectionId*/token);
             if(client != null)
             {

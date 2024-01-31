@@ -1,5 +1,6 @@
 ﻿using FixEngine.Entity;
 using FixEngine.Models;
+using FixEngine.Resources;
 using FixEngine.Services;
 using System.Collections.Concurrent;
 
@@ -8,7 +9,7 @@ namespace FixEngine.Shared
     public class SessionManager
     {
         private ConcurrentDictionary<string,Session> _session = new();
-        public void AddSession(string token, Entity.User user)
+        public void AddSession(string token, UserResource user)
         {
             if(!IsExist(token)) { 
                 _session.TryAdd(token, new Session() { 

@@ -19,7 +19,7 @@ namespace FixEngine.Migrations
                 .HasAnnotation("ProductVersion", "7.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("FixEngine.Enitity.Execution", b =>
+            modelBuilder.Entity("FixEngine.Entity.Execution", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -110,7 +110,7 @@ namespace FixEngine.Migrations
                     b.ToTable("Executions");
                 });
 
-            modelBuilder.Entity("FixEngine.Enitity.User", b =>
+            modelBuilder.Entity("FixEngine.Entity.User", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -128,7 +128,11 @@ namespace FixEngine.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PasswordSalt")
                         .IsRequired()
                         .HasColumnType("longtext");
 

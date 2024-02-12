@@ -15,9 +15,9 @@ namespace FixEngine.Services
             _executionManager = executionManager;
 
         }
-        public void ConnectClient(ApiCredentials apiCredentials, string id)
+        public void ConnectClient(ApiCredentials apiCredentials, string id, string lp)
         {
-            var client = new FixClient(apiCredentials);
+            var client = new FixClient(apiCredentials, lp);
 
             client.Connect();
 

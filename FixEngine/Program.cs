@@ -34,6 +34,7 @@ builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<LoginService>();
 builder.Services.AddSingleton<AccountService>();
 builder.Services.AddSingleton<ExecutionService>();
+builder.Services.AddSingleton<SymbolService>();
 builder.Services.AddSingleton<ExecutionManager>();
 
 builder.Services.AddDbContext<DatabaseContext>(options =>

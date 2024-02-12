@@ -43,12 +43,71 @@ namespace FixEngine.Hubs
             string status = (client != null) ? "Connected" : "Disconnected";
             await Clients.Caller.SendAsync("ConnectionStatus", status);
         }
-        public async Task Connect(ApiCredentials apiCredentials)
+        public async Task Connect(ApiCredentials apiCredentials, string lp)
         {
             _logger.LogInformation("Connecting... |", Context.ConnectionId.ToString());
-            _apiService.ConnectClient(apiCredentials, Context.ConnectionId);
+            _apiService.ConnectClient(apiCredentials, Context.ConnectionId, lp);
             _logger.LogInformation("Connected succcessfully");
             await Clients.Caller.SendAsync("Connected");
+        }
+        public async Task ConnectCentroid(string token)
+        {
+            _logger.LogInformation("Connecting centroid client with token => ", token);
+            if (string.IsNullOrEmpty(token))
+            {
+                _logger.LogError("Connecting failed. Reason: Token is null or empty");
+                await Clients.Caller.SendAsync("Disconnected");
+            }
+            bool sessionValid = _sessionManager.IsExist(token);
+            if (!sessionValid)
+            {
+                _logger.LogError("Client FIX Connection failed. Reason: Invalid session token");
+                await Clients.Caller.SendAsync("Disconnected");
+                return;
+            }
+            var client = _apiService.GetClient(token);
+            if (client == null)
+            {
+                //check if session exists
+                ApiCredentials apiCredentials = new ApiCredentials(
+                    QuoteHost: "crfuk.centroidsol.com",
+                    TradeHost: "crfuk.centroidsol.com",
+                    QuotePort: 53810,
+                    TradePort: 53811,
+                    QuoteSenderCompId: "MD_Fintic-FIX-TEST",
+                    TradeSenderCompId: "TD_Fintic-FIX-TEST",
+                    null,
+                    null,
+                    //QuoteSenderSubId: "testcentroid",// + token,
+                    //TradeSenderSubId: "testcentroid",// + token,
+                    QuoteTargetCompId: "CENTROID_SOL",
+                    TradeTargetCompId: "CENTROID_SOL",
+                    null,
+                    null,
+                    //QuoteTargetSubId: "QUOTE",
+                    //TradeTargetSubId: "TRADE",
+                    QuoteUsername: "Fintic-FIX-TEST",
+                    QuotePassword: "#oB*sFb6",
+                    TradeUsername: "Fintic-FIX-TEST",
+                    TradePassword: "#oB*sFb6", //"123Nm,.com",
+                    TradeResetOnLogin: "N",
+                    TradeSsl: "Y",
+                    QuoteResetOnLogin:"Y",
+                    QuoteSsl:"N",
+                    Account: "Fintic-Fix-Test"
+                    );
+                _logger.LogInformation("Connecting... |" + token);
+                _apiService.ConnectClient(apiCredentials, token, "CENTROID");
+                _logger.LogInformation("Connected succcessfully");
+
+                await Clients.Caller.SendAsync("Connected");
+
+            }
+            else
+            {
+                await Clients.Caller.SendAsync("Connected");
+            }
+
         }
         public async Task ConnectCtrader(string token)
         {
@@ -100,10 +159,18 @@ namespace FixEngine.Hubs
                     TradeTargetCompId: "cServer",
                     QuoteTargetSubId: "QUOTE",
                     TradeTargetSubId: "TRADE",
-                    Username: "4024137",
-                    Password: "Gtlfx125");
+                    QuoteUsername: "4024137",
+                    QuotePassword: "Gtlfx125",
+                    TradeUsername: "4024137",
+                    TradePassword: "Gtlfx125",
+                    TradeResetOnLogin: "N",
+                    TradeSsl: "N",
+                    QuoteResetOnLogin: "N",
+                    QuoteSsl: "N",
+                    Account: null
+                    );
                 _logger.LogInformation("Connecting... |" + token);// Context.ConnectionId.ToString());
-                _apiService.ConnectClient(apiCredentials, token);//Context.ConnectionId);
+                _apiService.ConnectClient(apiCredentials, token, "CTRADER");//Context.ConnectionId);
                 _logger.LogInformation("Connected succcessfully");
 
                 await Clients.Caller.SendAsync("Connected");
@@ -123,16 +190,16 @@ namespace FixEngine.Hubs
             var client = _apiService.GetClient(token);//Context.ConnectionId);
             if(client != null)
             {
-                _logger.LogInformation($"{/*Context.ConnectionId.ToString()*/token}- Initiating logout.. ");
+                _logger.LogInformation($"{token}- Initiating logout.. ");
                 client.SendLogoutRequest();
-                _logger.LogInformation($"{/*Context.ConnectionId.ToString()*/token}- Initiating client dispose.. ");
+                _logger.LogInformation($"{token}- Initiating client dispose.. ");
                 client.Dispose();
-                _logger.LogInformation($"{/*Context.ConnectionId.ToString()*/token}- Client Disposed");
+                _logger.LogInformation($"{token}- Client Disposed");
                 _logger.LogInformation("Disconnected succcessfully");
                 await Clients.Caller.SendAsync("Disconnected");
                 return ;
             }
-            _logger.LogInformation($"Client: {/*Context.ConnectionId.ToString()*/ token} not found");
+            _logger.LogInformation($"Client: {token} not found");
             await Clients.Caller.SendAsync("Disconnected");
 
         }

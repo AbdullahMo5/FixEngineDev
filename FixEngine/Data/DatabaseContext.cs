@@ -11,6 +11,7 @@ namespace FixEngine.Data
         }
         public DbSet<Execution> executions { get; set; }
         public DbSet<User> users { get; set; }
+        public DbSet<Symbol> symbols { get; set; }
     
     }
 }

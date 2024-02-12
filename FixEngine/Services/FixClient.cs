@@ -9,6 +9,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks.Dataflow;
 using QuickFix.FIX44;
 using System;
+using System.Net;
 
 namespace FixEngine.Services
 {
@@ -21,11 +22,14 @@ namespace FixEngine.Services
         private readonly QuickFix44App _tradeApp;
         private static int positionsCount = -1;
         private Common.Symbol[] _symbols;
-
-        public FixClient(ApiCredentials credentials)
+        private string _account;
+        private ApiCredentials _credentials;
+        public FixClient(ApiCredentials credentials, string lp)
         {
-            _tradeApp = new(credentials.Username, credentials.Password, credentials.TradeSenderCompId, credentials.TradeSenderSubId, credentials.TradeTargetCompId);
-            _quoteApp = new(credentials.Username, credentials.Password, credentials.QuoteSenderCompId, credentials.QuoteSenderSubId, credentials.QuoteTargetCompId);
+            _credentials = credentials; 
+            _account = credentials.Account;
+            _tradeApp = new(credentials.TradeUsername, credentials.TradePassword, credentials.TradeSenderCompId, credentials.TradeSenderSubId, credentials.TradeTargetCompId);
+            _quoteApp = new(credentials.QuoteUsername, credentials.QuotePassword, credentials.QuoteSenderCompId, credentials.QuoteSenderSubId, credentials.QuoteTargetCompId);
 
             var incomingMessagesProcessingBlock = new ActionBlock<QuickFix.Message>(ProcessIncomingMessage);
             var outgoingMessagesProcessingBlock = new ActionBlock<QuickFix.Message>(ProcessOutgoingMessage);
@@ -38,9 +42,9 @@ namespace FixEngine.Services
             _tradeApp.OutgoingMessagesBuffer.LinkTo(outgoingMessagesProcessingBlock, linkOptions);
             _quoteApp.OutgoingMessagesBuffer.LinkTo(outgoingMessagesProcessingBlock, linkOptions);
 
-            var tradeSettings = SessionSettingsFactory.GetSessionSettings(credentials.TradeHost, credentials.TradePort, credentials.TradeSenderCompId, credentials.TradeSenderSubId, credentials.TradeTargetSubId, credentials.TradeTargetCompId);
-            var quoteSettings = SessionSettingsFactory.GetSessionSettings(credentials.QuoteHost, credentials.QuotePort, credentials.QuoteSenderCompId, credentials.QuoteSenderSubId, credentials.QuoteTargetSubId, credentials.QuoteTargetCompId);
-
+            var tradeSettings = SessionSettingsFactory.GetSessionSettings(lp,credentials.TradeHost, credentials.TradePort, credentials.TradeSenderCompId, credentials.TradeSenderSubId, credentials.TradeTargetSubId, credentials.TradeTargetCompId, credentials.TradeResetOnLogin, credentials.TradeSsl);
+            var quoteSettings = SessionSettingsFactory.GetSessionSettings(lp,credentials.QuoteHost, credentials.QuotePort, credentials.QuoteSenderCompId, credentials.QuoteSenderSubId, credentials.QuoteTargetSubId, credentials.QuoteTargetCompId, credentials.QuoteResetOnLogin, credentials.QuoteSsl);
+            Console.WriteLine($"{lp} | {credentials.QuoteHost} | {credentials.QuotePort} | {credentials.QuoteSenderCompId} | {credentials.QuoteSenderSubId} | {credentials.QuoteTargetSubId} | {credentials.QuoteTargetCompId} | {credentials.QuoteResetOnLogin} | {credentials.QuoteSsl}");
             var tradeStoreFactory = new FileStoreFactory(tradeSettings);
             var quoteStoreFactory = new FileStoreFactory(quoteSettings);
 
@@ -62,12 +66,15 @@ namespace FixEngine.Services
         {
             try
             {
+                Console.WriteLine($"Starting trade session on url: {_credentials.TradeHost} port: {_credentials.TradePort}");
                 _tradeInitiator.Start();
+                Console.WriteLine($"Starting market data session on url: {_credentials.QuoteHost} port: {_credentials.QuotePort}");
                 _quoteInitiator.Start();
 
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());   
                 _tradeInitiator?.Stop();
                 _quoteInitiator?.Stop();
                 throw ex;
@@ -132,7 +139,17 @@ namespace FixEngine.Services
                 case QuickFix.FIX44.NewOrderSingle:
                     type = "NEW ORDER REQUEST";
                     break;
-                default:
+                case QuickFix.FIX44.Reject:
+                    type = "REJECT";
+                    break;
+                case QuickFix.FIX44.ResendRequest:
+                    type = "RESEND REQUEST";
+                    break;
+                case QuickFix.FIX44.SequenceReset:
+                    type = "SEQUENCE RESET";
+                    break;
+                case QuickFix.FIX44.TestRequest:
+                    type = "TEST REQUEST";
                     break;
             }
             return type;
@@ -281,12 +298,12 @@ namespace FixEngine.Services
             });
 
             var message = new QuickFix.FIX44.NewOrderSingle(
-            new ClOrdID(parameters.ClOrdId),
-                new QuickFix.Fields.Symbol(parameters.SymbolId.ToString(CultureInfo.InvariantCulture)),
+                new ClOrdID(parameters.ClOrdId),
+                new QuickFix.Fields.Symbol(parameters.SymbolName ?? parameters.SymbolId?.ToString(CultureInfo.InvariantCulture) ),
                 new Side(parameters.TradeSide.ToLowerInvariant().Equals("buy", StringComparison.OrdinalIgnoreCase) ? '1' : '2'),
                 new TransactTime(DateTime.Now),
                 ordType);
-
+            if (!string.IsNullOrWhiteSpace(_account)) message.Set(new Account(_account));
             message.Set(new OrderQty(Convert.ToDecimal(parameters.Quantity)));
 
             if (ordType.getValue() != OrdType.MARKET)
@@ -312,7 +329,7 @@ namespace FixEngine.Services
             }
             else
             {
-                message.Set(new TimeInForce('3'));
+                message.Set(new TimeInForce(TimeInForce.FILL_OR_KILL));
 
                 if (parameters.PositionId.HasValue)
                 {
@@ -427,13 +444,13 @@ namespace FixEngine.Services
         }
     }
 
-    public record ApiCredentials(string QuoteHost, string TradeHost, int QuotePort, int TradePort, string QuoteSenderCompId, string TradeSenderCompId, string QuoteSenderSubId, string TradeSenderSubId, string QuoteTargetCompId, string TradeTargetCompId, string QuoteTargetSubId, string TradeTargetSubId, string Username, string Password);
+    public record ApiCredentials(string QuoteHost, string TradeHost, int QuotePort, int TradePort, string QuoteSenderCompId, string TradeSenderCompId, string ? QuoteSenderSubId, string ? TradeSenderSubId, string QuoteTargetCompId, string TradeTargetCompId, string ? QuoteTargetSubId, string ? TradeTargetSubId, string QuoteUsername, string QuotePassword, string TradeUsername, string TradePassword, string TradeResetOnLogin, string QuoteResetOnLogin, string TradeSsl, string QuoteSsl, string ?Account );
 
     public record Log(string Type, string MessageType, DateTimeOffset Time, string Message);
 
     public record ExecutionReport(string ExecId, char Type, Order Order, string ClOrderId);
 
-    public record NewOrderRequestParameters(string Type, string ClOrdId, int SymbolId, string TradeSide, decimal Quantity, decimal TargetPrice)
+    public record NewOrderRequestParameters(string Type, string ClOrdId, int ?SymbolId, string ?SymbolName, string TradeSide, decimal Quantity, decimal TargetPrice)
     {
         //public double TargetPrice { get; init; }
 

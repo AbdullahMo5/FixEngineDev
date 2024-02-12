@@ -69,10 +69,11 @@ namespace Common
 
             if (messageType.Equals("0", StringComparison.OrdinalIgnoreCase) || messageType.Equals("1", StringComparison.OrdinalIgnoreCase) || messageType.Equals("3", StringComparison.OrdinalIgnoreCase)) return;
 
-            message.SetField(new StringField(49, _senderCompId), true);
-            message.SetField(new StringField(56, _targetCompId), true);
-            message.SetField(new StringField(50, _senderSubId), true);
-            message.SetField(new StringField(52, DateTimeOffset.UtcNow.ToString("yyyyMMdd-HH:mm:ss")), true);
+            //message.SetField(new StringField(49, _senderCompId), true);
+            //message.SetField(new StringField(56, _targetCompId), true);
+            if(_senderSubId != null)
+                message.SetField(new StringField(50, _senderSubId), true);
+            //message.SetField(new StringField(52, DateTimeOffset.UtcNow.ToString("yyyyMMdd-HH:mm:ss")), true);
             message.SetField(new StringField(553, _username), true);
             message.SetField(new StringField(554, _password), true);
         }

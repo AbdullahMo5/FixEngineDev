@@ -10,6 +10,7 @@ using System.Threading.Tasks.Dataflow;
 using QuickFix.FIX44;
 using System;
 using System.Net;
+using FixEngine.Models;
 
 namespace FixEngine.Services
 {
@@ -20,14 +21,20 @@ namespace FixEngine.Services
 
         private readonly QuickFix44App _quoteApp;
         private readonly QuickFix44App _tradeApp;
+
         private static int positionsCount = -1;
         private Common.Symbol[] _symbols;
         private string _account;
+        private string _lp;
+
         private ApiCredentials _credentials;
-        public FixClient(ApiCredentials credentials, string lp)
+        private SymbolService _symbolService;
+        public FixClient(ApiCredentials credentials, string lp, SymbolService symbolService)
         {
             _credentials = credentials; 
             _account = credentials.Account;
+            _symbolService = symbolService;
+            _lp = lp;
             _tradeApp = new(credentials.TradeUsername, credentials.TradePassword, credentials.TradeSenderCompId, credentials.TradeSenderSubId, credentials.TradeTargetCompId);
             _quoteApp = new(credentials.QuoteUsername, credentials.QuotePassword, credentials.QuoteSenderCompId, credentials.QuoteSenderSubId, credentials.QuoteTargetCompId);
 
@@ -46,13 +53,16 @@ namespace FixEngine.Services
             var quoteSettings = SessionSettingsFactory.GetSessionSettings(lp,credentials.QuoteHost, credentials.QuotePort, credentials.QuoteSenderCompId, credentials.QuoteSenderSubId, credentials.QuoteTargetSubId, credentials.QuoteTargetCompId, credentials.QuoteResetOnLogin, credentials.QuoteSsl);
             Console.WriteLine($"{lp} | {credentials.QuoteHost} | {credentials.QuotePort} | {credentials.QuoteSenderCompId} | {credentials.QuoteSenderSubId} | {credentials.QuoteTargetSubId} | {credentials.QuoteTargetCompId} | {credentials.QuoteResetOnLogin} | {credentials.QuoteSsl}");
             var tradeStoreFactory = new FileStoreFactory(tradeSettings);
+            var tradeLogFactory = new QuickFix.FileLogFactory(tradeSettings);
             var quoteStoreFactory = new FileStoreFactory(quoteSettings);
+            var quoteLogFactory = new QuickFix.FileLogFactory(quoteSettings);
 
-            _tradeInitiator = new(_tradeApp, tradeStoreFactory, tradeSettings);
-            _quoteInitiator = new(_quoteApp, quoteStoreFactory, quoteSettings);
+            _tradeInitiator = new(_tradeApp, tradeStoreFactory, tradeSettings, tradeLogFactory);
+            _quoteInitiator = new(_quoteApp, quoteStoreFactory, quoteSettings, quoteLogFactory);
         }
 
         public Channel<Log> LogsChannel { get; } = Channel.CreateUnbounded<Log>();
+        public Channel<Log> TradeLogsChannel { get; } = Channel.CreateUnbounded<Log>();
 
         public Channel<ExecutionReport> ExecutionReportChannel { get; } = Channel.CreateUnbounded<ExecutionReport>();
         public Channel<ExecutionReport> OrdersExecutionReportChannel { get; } = Channel.CreateUnbounded<ExecutionReport>();
@@ -87,6 +97,7 @@ namespace FixEngine.Services
             _quoteApp.Dispose();
             _tradeInitiator?.Dispose();
             _quoteInitiator?.Dispose();
+            GC.SuppressFinalize( this );
         }
 
         private async Task ProcessOutgoingMessage(QuickFix.Message message)
@@ -117,6 +128,9 @@ namespace FixEngine.Services
                     break;
                 case QuickFix.FIX44.MarketDataRequest:
                     type = "MARKET DATA REQUEST";
+                    break;
+                case QuickFix.FIX44.MarketDataRequestReject:
+                    type = "MARKET DATA REQUEST REJECT";
                     break;
                 case QuickFix.FIX44.MarketDataSnapshotFullRefresh:
                     type = "MARKET DATA";
@@ -162,11 +176,16 @@ namespace FixEngine.Services
                 await LogsChannel.Writer.WriteAsync(new("Received", GetMessageTypeString(message), DateTimeOffset.UtcNow, message.ToString('|')));
             }
 
-            if (message is QuickFix.FIX44.Logon && message.Header.IsSetField(50) && message.Header.GetString(50).Equals("TRADE", StringComparison.OrdinalIgnoreCase) && _tradeInitiator.IsLoggedOn)
+            if (message is QuickFix.FIX44.Logon )
             {
                 Console.WriteLine("Client logged in ...");
-                SendSecurityListRequest();
-
+                if (_lp.Equals("CTRADER", StringComparison.OrdinalIgnoreCase) && message.Header.IsSetField(50) && message.Header.GetString(50).Equals("TRADE", StringComparison.OrdinalIgnoreCase) && _tradeInitiator.IsLoggedOn)
+                {
+                    SendSecurityListRequest();
+                }
+                else if (_lp.Equals("CENTROID", StringComparison.OrdinalIgnoreCase) && message.Header.IsSetField(56) && message.Header.GetString(56).Equals("MD_Fintic-FIX-TEST", StringComparison.OrdinalIgnoreCase)) { 
+                    await OnSecurityList();                
+                } 
                 return;
             }
 
@@ -199,29 +218,43 @@ namespace FixEngine.Services
         }
         private async Task OnExecutionReport(QuickFix.FIX44.ExecutionReport executionReport)
         {
-            var order = executionReport.GetOrder();
+            var order = (_lp.Equals("CTRADER", StringComparison.OrdinalIgnoreCase))
+                        ? executionReport.GetOrder()
+                        : (_lp.Equals("CENTROID", StringComparison.OrdinalIgnoreCase))
+                            ? executionReport.GetOrderII()
+                            : executionReport.GetOrderII();
+
+            string side = ((char)executionReport.Side.getValue() == Side.BUY) 
+                ? "BUY" 
+                : ((char)executionReport.Side.getValue() == Side.SELL)
+                    ? "SELL"
+                    : executionReport.Side.getValue().ToString();
+            
             Console.WriteLine("Recv execution: ", order);
+            
+            if(_lp.Equals ("CTRADER", StringComparison.OrdinalIgnoreCase)) order.SymbolName = _symbols.FirstOrDefault(symbol => symbol.Id == order.SymbolId)?.Name;
+            
             if (order.Type.Equals("Market", StringComparison.OrdinalIgnoreCase) && executionReport.CumQty.getValue() > 0)
             {
-                order.SymbolName = _symbols.FirstOrDefault(symbol => symbol.Id == order.SymbolId)?.Name;
                 //await PositionReportChannel.Writer.WriteAsync(null);
                 char executionType = executionReport.ExecType.getValue();
                 string clOrderId = executionReport.ClOrdID.getValue();
                 string execId = executionReport.IsSetField(17) ? executionReport.GetString(17) : string.Empty;
                 await ExecutionReportChannel.Writer.WriteAsync(new(execId, executionType, order, clOrderId));
                 Console.WriteLine("Requesting for positions");
+                await TradeLogsChannel.Writer.WriteAsync(new("IN", "ExecutionReport", DateTimeOffset.UtcNow, $"(Execution: Market) Account: {executionReport.Account}: #{order.PositionId}    {order.SymbolName}     {order.Volume}      {side}      {order.Price}  - OrdStatus: {order.OrderStatus} - ExecutedQTY: {executionReport.CumQty} - RemainingQTY: {executionReport.LeavesQty} "));
                 SendPositionsRequest();
             }
             //pending orders
             else if (order.Type.Equals("Market", StringComparison.OrdinalIgnoreCase) is false)
             {
-                order.SymbolName = _symbols.FirstOrDefault(symbol => symbol.Id == order.SymbolId)?.Name;
                 char executionType = executionReport.ExecType.getValue();
                 string clOrderId = executionReport.ClOrdID.getValue();
                 string execId = executionReport.IsSetField(17) ? executionReport.GetString(17) : string.Empty;
 
                 //if (executionType != '4' && executionType != '8' && executionType != 'C' && executionType != 'F')
                 await OrdersExecutionReportChannel.Writer.WriteAsync(new(execId, executionType, order, clOrderId));
+                await TradeLogsChannel.Writer.WriteAsync(new("IN", "ExecutionReport", DateTimeOffset.UtcNow, $"(Execution: {order.Type}) - Account: {executionReport.Account} - OrderID: {executionReport.OrderID} - OrdStatus: {executionReport.OrdStatus} - Symbol: {executionReport.Symbol} - OrdQTY: {executionReport.OrderQty} - ExecutedQTY: {executionReport.CumQty} - RemainingQTY: {executionReport.LeavesQty} - Direction: {side} - OrdType: {order.Type} - Price: {executionReport?.Price} "));
             }
         }
 
@@ -257,11 +290,26 @@ namespace FixEngine.Services
 
         private async Task OnMarketDataSnapshotFullRefresh(QuickFix.FIX44.MarketDataSnapshotFullRefresh marketDataSnapshotFullRefresh)
         {
-            var symbolQuote = marketDataSnapshotFullRefresh.GetSymbolQuote();
-            var symbol = _symbols.DefaultIfEmpty(null).First(i => i.Id == symbolQuote.SymbolId);
-            SymbolQuote quote = new SymbolQuote(symbolQuote.SymbolId, symbol.Name, symbolQuote.Bid, symbolQuote.Ask, symbol.Digits);
-            if(symbol != null)
-                await MarketDataSnapshotFullRefreshChannel.Writer.WriteAsync(quote);
+            if (_lp.Equals("CTRADER", StringComparison.OrdinalIgnoreCase))
+            {
+                var symbolQuote = marketDataSnapshotFullRefresh.GetSymbolQuote();
+                var symbol = _symbols.DefaultIfEmpty(null).First(i => i.Id == symbolQuote.SymbolId);
+                SymbolQuote quote = new SymbolQuote(symbolQuote.SymbolId, symbol.Name, symbolQuote.Bid, symbolQuote.Ask, symbol.Digits);
+                if (symbol != null)
+                    await MarketDataSnapshotFullRefreshChannel.Writer.WriteAsync(quote);
+            }
+            else if (_lp.Equals("CENTROID", StringComparison.OrdinalIgnoreCase)) {
+                var symbolQuote = marketDataSnapshotFullRefresh.GetSymbolQuoteII();
+                var symbol = _symbolService.GetSymbolByLP(_lp, symbolQuote.SymbolName);
+
+                if (symbol != null)
+                {
+                    SymbolQuote quote = new SymbolQuote(Int32.Parse(symbol.Id), symbol.Name, symbolQuote.Bid, symbolQuote.Ask, symbol.Digits);
+                    await MarketDataSnapshotFullRefreshChannel.Writer.WriteAsync(quote);
+                }
+            }
+
+
         }
 
         private async Task OnSecurityList(QuickFix.FIX44.SecurityList securityList)
@@ -285,8 +333,18 @@ namespace FixEngine.Services
 
             SecurityChannel.Writer.TryComplete();
         }
-
-        public void SendNewOrderRequest(NewOrderRequestParameters parameters)
+        private async Task OnSecurityList()
+        {
+            var symbols = _symbolService.GetSymbols();
+            foreach( var symbol in symbols)
+            {
+                var _ssymbol =new Common.Symbol(Int32.Parse(symbol.Id), symbol.LPSymbolName, symbol.Digits);
+                await SecurityChannel.Writer.WriteAsync(new Common.Symbol(Int32.Parse(symbol.Id), symbol.LPSymbolName, symbol.Digits ));
+                SendMarketDataRequest(true, symbol.LPSymbolName);
+            }
+            SecurityChannel.Writer.TryComplete();
+        }
+        public async void SendNewOrderRequest(NewOrderRequestParameters parameters)
         {
             Console.WriteLine("Recvd new order send request. Sending order");
             var ordType = new OrdType(parameters.Type.ToLowerInvariant() switch
@@ -318,11 +376,12 @@ namespace FixEngine.Services
                     }
                     else
                     {
-                        message.Set(new StopPx(Convert.ToDecimal(parameters.TargetPrice)));
+                        if(_lp.Equals("CENTROID", StringComparison.OrdinalIgnoreCase))message.Set(new Price(Convert.ToDecimal(parameters.TargetPrice)));
+                        else if(_lp.Equals("CTRADER", StringComparison.OrdinalIgnoreCase))message.Set(new StopPx(Convert.ToDecimal(parameters.TargetPrice)));
                     }
                 }
 
-                if (parameters.Expiry.HasValue)
+                if (parameters.Expiry.HasValue && _lp.Equals("CTRADER", StringComparison.OrdinalIgnoreCase))
                 {
                     message.Set(new ExpireTime(parameters.Expiry.Value));
                 }
@@ -345,8 +404,9 @@ namespace FixEngine.Services
             message.Header.GetString(Tags.BeginString);
 
             _tradeApp.SendMessage(message);
+            await TradeLogsChannel.Writer.WriteAsync(new("OUT", "NewOrderSingleRequest", DateTimeOffset.UtcNow, $"New Order - Symbol: {parameters.SymbolName} - QTY: {parameters.Quantity} - Direction: {parameters.TradeSide} - OrdType: {parameters.Type} - Price: {parameters?.TargetPrice} - Expiry: {parameters?.Expiry}"));
         }
-        public void SendOrderAmmendRequest(OrderAmmendRequest parameters)
+        public async void SendOrderAmmendRequest(OrderAmmendRequest parameters)
         {
             Console.WriteLine("Recvd order ammend request. Sending order");
             var ordType = new OrdType(parameters.OrderType.ToLowerInvariant() switch
@@ -381,9 +441,11 @@ namespace FixEngine.Services
             message.Header.GetString(Tags.BeginString);
 
             _tradeApp.SendMessage(message);
+
+            await TradeLogsChannel.Writer.WriteAsync(new("OUT", "OrderAmmendRequest", DateTimeOffset.UtcNow, $"Ammend - OrderID: {parameters.OrderId}# - QTY: {parameters.OrderQty} - OrdType: {parameters.OrderType} - TargetPrice: {parameters?.TargetPrice} - Expiry: {parameters?.Expiry}"));
         }
 
-        public void SendOrderCancelRequest(OrderCancelRequestParameters requestParams)
+        public async void SendOrderCancelRequest(OrderCancelRequestParameters requestParams)
         {
             var message = new OrderCancelRequest();
             message.Set(new OrigClOrdID(requestParams.OrigClOrderId));
@@ -398,6 +460,7 @@ namespace FixEngine.Services
             message.Header.GetString(Tags.BeginString);
             _tradeApp.SendMessage(message);
 
+            await TradeLogsChannel.Writer.WriteAsync(new("OUT", "OrderCancelRequest", DateTimeOffset.UtcNow, $"Closing - OrderID:{requestParams.OrderId}# "));
         }
         private void SendSecurityListRequest()
         {
@@ -415,9 +478,13 @@ namespace FixEngine.Services
         {
             positionsCount = -1;
             QuickFix.FIX44.RequestForPositions message = new();
-
             message.PosReqID = new PosReqID("Positions");
-
+            if (_lp.Equals("CENTROID", StringComparison.OrdinalIgnoreCase))
+            {
+                message.Account = new Account(_account);
+                message.AccountType = new AccountType(1);
+                message.TransactTime = new TransactTime(DateTime.UtcNow);
+            }
             _tradeApp.SendMessage(message);
         }        
 
@@ -431,6 +498,20 @@ namespace FixEngine.Services
             message.AddGroup(offerMarketDataEntryGroup);
 
             QuickFix.FIX44.MarketDataRequest.NoRelatedSymGroup symbolGroup = new() { Symbol = new QuickFix.Fields.Symbol(symbolId.ToString(CultureInfo.InvariantCulture)) };
+            message.AddGroup(symbolGroup);
+
+            _quoteApp.SendMessage(message);
+        }
+        private void SendMarketDataRequest(bool subscribe, string symbol)
+        {
+            QuickFix.FIX44.MarketDataRequest message = new(new("MARKETDATA_"+symbol), new(subscribe ? '1' : '2'), new(1));
+
+            QuickFix.FIX44.MarketDataRequest.NoMDEntryTypesGroup bidMarketDataEntryGroup = new() { MDEntryType = new MDEntryType('0') };
+            QuickFix.FIX44.MarketDataRequest.NoMDEntryTypesGroup offerMarketDataEntryGroup = new() { MDEntryType = new MDEntryType('1') };
+            message.AddGroup(bidMarketDataEntryGroup);
+            message.AddGroup(offerMarketDataEntryGroup);
+
+            QuickFix.FIX44.MarketDataRequest.NoRelatedSymGroup symbolGroup = new() { Symbol = new QuickFix.Fields.Symbol(symbol) };
             message.AddGroup(symbolGroup);
 
             _quoteApp.SendMessage(message);

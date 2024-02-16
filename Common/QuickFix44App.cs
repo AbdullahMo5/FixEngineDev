@@ -74,8 +74,12 @@ namespace Common
             if(_senderSubId != null)
                 message.SetField(new StringField(50, _senderSubId), true);
             //message.SetField(new StringField(52, DateTimeOffset.UtcNow.ToString("yyyyMMdd-HH:mm:ss")), true);
-            message.SetField(new StringField(553, _username), true);
-            message.SetField(new StringField(554, _password), true);
+            if (messageType.Equals("5", StringComparison.OrdinalIgnoreCase) is false)
+            {
+                message.SetField(new StringField(553, _username), true);
+                message.SetField(new StringField(554, _password), true);
+            }
+            //Console.WriteLine($"{sessionID}| Sending Admin => {message.ToString()}");
         }
 
         public void FromApp(Message message, SessionID sessionID)

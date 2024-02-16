@@ -15,7 +15,7 @@ namespace Common
 
             stringBuilder.AppendLine("[DEFAULT]");
             stringBuilder.AppendLine("ConnectionType=initiator");
-            stringBuilder.AppendLine("ReconnectInterval=30");
+            stringBuilder.AppendLine("ReconnectInterval=10");
             stringBuilder.AppendLine("FileStorePath=store");
             stringBuilder.AppendLine("FileLogPath=log");
             stringBuilder.AppendLine("HeartBtInt=30");
@@ -35,7 +35,7 @@ namespace Common
             stringBuilder.AppendLine($"SocketConnectPort={port}");
             stringBuilder.AppendLine("LogoutTimeout=100");
             stringBuilder.AppendLine($"ResetOnLogon={resetOnLogin}");
-            //stringBuilder.AppendLine("ResetOnDisconnect=Y");
+            stringBuilder.AppendLine("ResetOnDisconnect=Y");
             stringBuilder.AppendLine("[SESSION]");
             stringBuilder.AppendLine("BeginString=FIX.4.4");
             stringBuilder.AppendLine($"SenderCompID={senderCompId}");

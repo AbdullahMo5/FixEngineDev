@@ -221,7 +221,7 @@ namespace FixEngine.Hubs
             }
             else
                 _logger.LogInformation($"Client: {Context.ConnectionId.ToString()} not found");*/
-            Clients.Caller.SendAsync("Disconnected");
+            Clients.Caller.SendAsync("Disconnected");            
             return base.OnDisconnectedAsync(exception);
         }
 
@@ -273,6 +273,21 @@ namespace FixEngine.Hubs
             }
         }
 
+        public async IAsyncEnumerable<Services.Log> TradeLogs(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            var client = _apiService.GetClient(token);
+            if(client != null)
+            {
+                while (await client.TradeLogsChannel.Reader.WaitToReadAsync(cancellationToken))
+                {
+                    while (client.TradeLogsChannel.Reader.TryRead(out var log))
+                    {
+                        yield return log;
+                    }
+                }
+
+            }
+        }
         public async IAsyncEnumerable<Services.Log> Logs(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var client = _apiService.GetClient(token);

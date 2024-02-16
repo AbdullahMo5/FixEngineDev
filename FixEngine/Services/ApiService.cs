@@ -8,16 +8,18 @@ namespace FixEngine.Services
     {
         private ILogger<ApiService> _logger;
         private ExecutionManager _executionManager;
+        private SymbolService _symbolService;
         private ConcurrentDictionary<string, FixClient> _clients = new();
-        public ApiService(ILogger<ApiService> logger, ExecutionManager executionManager)
+        public ApiService(ILogger<ApiService> logger, ExecutionManager executionManager, SymbolService symbolService)
         {
             _logger = logger;
             _executionManager = executionManager;
+            _symbolService = symbolService;
 
         }
         public void ConnectClient(ApiCredentials apiCredentials, string id, string lp)
         {
-            var client = new FixClient(apiCredentials, lp);
+            var client = new FixClient(apiCredentials, lp, _symbolService);
 
             client.Connect();
 

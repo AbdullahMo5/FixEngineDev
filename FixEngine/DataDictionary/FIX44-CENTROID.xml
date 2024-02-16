@@ -115,6 +115,7 @@
 		</message>
 		<message name="MarketDataRequestReject" msgtype="Y" msgcat="app">
 			<field name="MDReqID" required="Y" />
+      <field name="MDReqRejReason" required="N" />
 			<field name="Text" required="N" />			
 		</message>
 		<message name="MarketDataSnapshotFullRefresh" msgtype="W" msgcat="app">
@@ -226,7 +227,10 @@
 			<field name="TransactTime" required="Y" />
 		</message>
 		<message name="RequestForPositions" msgtype="AN" msgcat="app">
+      <field name="Account" required="Y" />
+      <field name="AccountType" required="Y" />
 			<field name="PosReqID" required="Y" />
+      <field name="TransactTime" required="Y" />
 			<field name="PosMaintRptID" required="N" />
 		</message>
 		<message name="PositionReport" msgtype="AP" msgcat="app">
@@ -510,8 +514,8 @@
 			<value enum="C" description="OPEN_INTEREST" />
 		</field>
 		<field number="270" name="MDEntryPx" type="PRICE" />
-		<field number="271" name="MDEntrySize" type="UTCTIMESTAMP" />
-		<field number="273" name="MDEntryTime" type="QTY" />
+		<field number="271" name="MDEntrySize" type="QTY" />
+		<field number="273" name="MDEntryTime" type="STRING" />
 		<field number="278" name="MDEntryID" type="STRING" />
 		<field number="279" name="MDUpdateAction" type="CHAR">
 			<value enum="0" description="NEW" />
@@ -608,6 +612,7 @@
 			<value enum="4" description="INSTRUMENT_DATA_TEMPORARILY_UNAVAILABLE" />
 			<value enum="5" description="REQUEST_FOR_INSTRUMENT_DATA_NOT_SUPPORTED" />
 		</field>
+		<field number="581" name="AccountType" type="INT" />
 		<field number="584" name="MassStatusReqID" type="STRING" />
 		<field number="585" name="MassStatusReqType" type="INT">
 			<value enum="1" description="STATUS_FOR_ORDERS_FOR_A_SECURITY" />

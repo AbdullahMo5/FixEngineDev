@@ -1,9 +1,10 @@
 ﻿using FixEngine.Entity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace FixEngine.Data
 {
-    public class DatabaseContext: DbContext
+    public class DatabaseContext: IdentityDbContext<AppUser>
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {

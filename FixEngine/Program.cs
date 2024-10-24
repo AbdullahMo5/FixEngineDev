@@ -1,11 +1,13 @@
 using FixEngine.Auth;
 using FixEngine.Data;
+using FixEngine.Entity;
 using FixEngine.Hubs;
 using FixEngine.Middlewares;
 using FixEngine.Services;
 using FixEngine.Shared;
 using Managers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -41,10 +43,11 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-},ServiceLifetime.Singleton);
+}, ServiceLifetime.Singleton);
 builder.Services.AddSingleton<ApiService>();
 builder.Services.AddSingleton<SessionManager>();
 builder.Services.AddTransient<IApiKeyValidation, ApiKeyValidation>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -55,29 +58,69 @@ builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
 }).AddJsonProtocol(options =>
-{    
+{
     options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
 
-builder.Services.AddAuthentication(options => { 
+builder.Services.AddAuthentication(options =>
+{
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options => {
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters{
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        ValidateIssuer = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidateAudience = true,
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-        ValidateIssuer=true,
-        ValidateAudience=true,
-        ValidateLifetime=true,
-        ValidateIssuerSigningKey=true
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"])),
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
+{
+    opt.Password.RequireDigit = true;
+    opt.Password.RequireLowercase = true;
+    opt.Password.RequireUppercase = true;
+    opt.Password.RequireNonAlphanumeric = true;
+}).AddEntityFrameworkStores<DatabaseContext>()
+.AddDefaultTokenProviders();
 
+builder.Services.AddAuthorization();
 var app = builder.Build();
+ApiCredentials apiCredentials = new ApiCredentials(
+    QuoteHost: "crfuk.centroidsol.com",
+    TradeHost: "crfuk.centroidsol.com",
+    QuotePort: 53810,
+    TradePort: 53811,
+    QuoteSenderCompId: "MD_Fintic-FIX-TEST",
+    TradeSenderCompId: "TD_Fintic-FIX-TEST",
+    null,
+    null,
+    //QuoteSenderSubId: "testcentroid",// + token,
+    //TradeSenderSubId: "testcentroid",// + token,
+    QuoteTargetCompId: "CENTROID_SOL",
+    TradeTargetCompId: "CENTROID_SOL",
+    null,
+    null,
+    //QuoteTargetSubId: "QUOTE",
+    //TradeTargetSubId: "TRADE",
+    QuoteUsername: "Fintic-FIX-TEST",
+    QuotePassword: "#oB*sFb6",
+    TradeUsername: "Fintic-FIX-TEST",
+    TradePassword: "#oB*sFb6", //"123Nm,.com",
+    TradeResetOnLogin: "N",
+    TradeSsl: "Y",
+    QuoteResetOnLogin: "Y",
+    QuoteSsl: "N",
+    Account: "Fintic-Fix-Test"
+    );
+var apiService = app.Services.GetRequiredService<ApiService>();
+apiService.ConnectClient(apiCredentials, Guid.NewGuid().ToString(), "CENTROID");
 
 app.UseSerilogRequestLogging();
 app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/secure"), appBuilder =>
@@ -92,11 +135,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseCors(options =>
-    options.WithOrigins("http://localhost:3000")
+    options.WithOrigins("http://localhost:3000", "http://127.0.0.1:5000")
     .AllowAnyHeader()
     .WithMethods("GET", "POST")
     .AllowCredentials());
-            
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

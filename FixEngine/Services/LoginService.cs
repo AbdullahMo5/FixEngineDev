@@ -1,8 +1,5 @@
-﻿using FixEngine.Controllers;
-using FixEngine.Data;
-using FixEngine.Entity;
+﻿using FixEngine.Data;
 using FixEngine.Shared;
-using Services;
 
 namespace FixEngine.Services
 {
@@ -24,9 +21,11 @@ namespace FixEngine.Services
         {
             return Guid.NewGuid().ToString();
         }
-        public bool Authenticate(string email, string password) {
+        public bool Authenticate(string email, string password)
+        {
             var user = _userService.GetUser(email, password);//_context.users.FirstOrDefault(x => x.Email == email);
-            if (user == null) {
+            if (user == null)
+            {
                 return false;
             }
             else
@@ -45,12 +44,13 @@ namespace FixEngine.Services
                 string token = GenerateToken();
                 _sessionManager.AddSession(token, user);
                 return token;
-                
+
             }
             return "";
         }
-        public void Logout(string token) {
-            _sessionManager.RemoveSession(token);   
+        public void Logout(string token)
+        {
+            _sessionManager.RemoveSession(token);
             //var user = _context.users.FirstOrDefault();
         }
     }

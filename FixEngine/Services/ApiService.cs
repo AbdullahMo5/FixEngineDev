@@ -1,7 +1,5 @@
 ﻿using Managers;
 using System.Collections.Concurrent;
-using System.Net;
-using System.Threading;
 namespace FixEngine.Services
 {
     public class ApiService
@@ -17,7 +15,7 @@ namespace FixEngine.Services
             _symbolService = symbolService;
 
         }
-        public void ConnectClient(ApiCredentials apiCredentials, string id, string lp)
+        public async Task ConnectClient(ApiCredentials apiCredentials, string id, string lp)
         {
             var client = new FixClient(apiCredentials, lp, _symbolService);
 
@@ -26,9 +24,11 @@ namespace FixEngine.Services
             _clients.AddOrUpdate(id, client, (id, oldClient) => client);
             //ConsumeClient(id);
             //TODO: start consumer
+
         }
 
-        public FixClient? GetClient(string id) {
+        public FixClient? GetClient(string id)
+        {
             return _clients.ContainsKey(id) ? _clients[id] : null;
         }
 
@@ -53,7 +53,7 @@ namespace FixEngine.Services
                         {
                             while (client.ExecutionReportChannel.Reader.TryRead(out var executionReport))
                             {
-                               await _executionManager.Process(executionReport, id);
+                                await _executionManager.Process(executionReport, id);
                             }
                         }
 

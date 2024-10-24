@@ -1,8 +1,11 @@
-﻿namespace FixEngine.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FixEngine.Models
 {
     public class LoginRequestModel
     {
-        public string Email { get;set; }
-        public string Password { get;set; }
+        [EmailAddress(ErrorMessage = "Ivalid Email")]
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 }

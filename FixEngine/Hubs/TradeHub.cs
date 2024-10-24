@@ -1,18 +1,11 @@
-﻿using FixEngine.Services;
-using Common;
-using Microsoft.AspNetCore.SignalR;
-using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using FixEngine.Controllers;
-using Managers;
-using Services;
-using QuickFix.Fields;
+﻿using Common;
+using FixEngine.Services;
 using FixEngine.Shared;
+using Managers;
+using Microsoft.AspNetCore.SignalR;
+using Services;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks.Dataflow;
 
 namespace FixEngine.Hubs
 {
@@ -32,7 +25,8 @@ namespace FixEngine.Hubs
             _sessionManager = sessionManager;
         }
 
-        public async Task Ping() {
+        public async Task Ping()
+        {
 
             _logger.LogInformation("Pong... |", Context.ConnectionId);
             await Clients.Caller.SendAsync("Pong", "Pong");
@@ -92,8 +86,8 @@ namespace FixEngine.Hubs
                     TradePassword: "#oB*sFb6", //"123Nm,.com",
                     TradeResetOnLogin: "N",
                     TradeSsl: "Y",
-                    QuoteResetOnLogin:"Y",
-                    QuoteSsl:"N",
+                    QuoteResetOnLogin: "Y",
+                    QuoteSsl: "N",
                     Account: "Fintic-Fix-Test"
                     );
                 _logger.LogInformation("Connecting... |" + token);
@@ -131,19 +125,20 @@ namespace FixEngine.Hubs
             */
             //acc2
             _logger.LogInformation("Connecting with token => ", token);
-            if (string.IsNullOrEmpty(token)) {
+            if (string.IsNullOrEmpty(token))
+            {
                 _logger.LogError("Connecting failed. Reason: Token is null or empty");
                 await Clients.Caller.SendAsync("Disconnected");
             }
             bool sessionValid = _sessionManager.IsExist(token);
-            if(!sessionValid)
+            if (!sessionValid)
             {
                 _logger.LogError("Client FIX Connection failed. Reason: Invalid session token");
                 await Clients.Caller.SendAsync("Disconnected");
                 return;
             }
             var client = _apiService.GetClient(token);
-            if(client == null)
+            if (client == null)
             {
                 //check if session exists
                 ApiCredentials apiCredentials = new ApiCredentials(
@@ -183,12 +178,12 @@ namespace FixEngine.Hubs
 
             //await PositionsIndexed(new CancellationToken());
         }
-        
+
         public async Task Disconnect(string token)
         {
-            _logger.LogInformation("Disconnecting... |" + token) ;
+            _logger.LogInformation("Disconnecting... |" + token);
             var client = _apiService.GetClient(token);//Context.ConnectionId);
-            if(client != null)
+            if (client != null)
             {
                 _logger.LogInformation($"{token}- Initiating logout.. ");
                 client.SendLogoutRequest();
@@ -197,7 +192,7 @@ namespace FixEngine.Hubs
                 _logger.LogInformation($"{token}- Client Disposed");
                 _logger.LogInformation("Disconnected succcessfully");
                 await Clients.Caller.SendAsync("Disconnected");
-                return ;
+                return;
             }
             _logger.LogInformation($"Client: {token} not found");
             await Clients.Caller.SendAsync("Disconnected");
@@ -221,7 +216,7 @@ namespace FixEngine.Hubs
             }
             else
                 _logger.LogInformation($"Client: {Context.ConnectionId.ToString()} not found");*/
-            Clients.Caller.SendAsync("Disconnected");            
+            Clients.Caller.SendAsync("Disconnected");
             return base.OnDisconnectedAsync(exception);
         }
 
@@ -229,54 +224,54 @@ namespace FixEngine.Hubs
         {
             _logger.LogInformation("Order ammend request ");
             var client = _apiService.GetClient(token);//Context.ConnectionId);
-            if(client != null)
+            if (client != null)
             {
                 _logger.LogInformation("Sending order ammend request");
                 client.SendOrderAmmendRequest(parameters);
             }
             else
             {
-                _logger.LogInformation("Client not found."); 
+                _logger.LogInformation("Client not found.");
             }
         }
         public void SendNewOrderRequest(string token, NewOrderRequestParameters parameters)
         {
             _logger.LogInformation("New order request ");
             var client = _apiService.GetClient(token);//Context.ConnectionId);
-            if(client != null)
+            if (client != null)
             {
                 _logger.LogInformation("Sending New order request");
                 client.SendNewOrderRequest(parameters);
             }
             else
             {
-                _logger.LogInformation("Client not found."); 
+                _logger.LogInformation("Client not found.");
             }
         }
         public void SendCloseOrderRequest(string token, string ClOrderId, string OrderId)
         {
             _logger.LogInformation("Close order request ");
             var client = _apiService.GetClient(token);
-            if(client != null)
+            if (client != null)
             {
                 //fetch from db
                 DateTime currentTime = DateTime.UtcNow;
                 long unixTime = ((DateTimeOffset)currentTime).ToUnixTimeSeconds();
                 _logger.LogInformation("Sending order cancel request");
                 client.SendOrderCancelRequest(new OrderCancelRequestParameters(OrigClOrderId: ClOrderId, OrderId: OrderId, ClOrdId: "" + unixTime));
-                    
+
 
             }
             else
             {
-                _logger.LogInformation("Client not found."); 
+                _logger.LogInformation("Client not found.");
             }
         }
 
         public async IAsyncEnumerable<Services.Log> TradeLogs(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var client = _apiService.GetClient(token);
-            if(client != null)
+            if (client != null)
             {
                 while (await client.TradeLogsChannel.Reader.WaitToReadAsync(cancellationToken))
                 {
@@ -291,7 +286,7 @@ namespace FixEngine.Hubs
         public async IAsyncEnumerable<Services.Log> Logs(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var client = _apiService.GetClient(token);
-            if(client != null)
+            if (client != null)
             {
                 while (await client.LogsChannel.Reader.WaitToReadAsync(cancellationToken))
                 {
@@ -304,10 +299,10 @@ namespace FixEngine.Hubs
             }
         }
 
-        public async IAsyncEnumerable<Common.Symbol> Symbols(string token,[EnumeratorCancellation] CancellationToken cancellationToken)
+        public async IAsyncEnumerable<Common.Symbol> Symbols(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var client = _apiService.GetClient(/*Context.ConnectionId*/token);
-            if(client != null)
+            if (client != null)
             {
                 while (await client.SecurityChannel.Reader.WaitToReadAsync(cancellationToken))
                 {
@@ -320,11 +315,11 @@ namespace FixEngine.Hubs
             }
         }
 
-        public async IAsyncEnumerable<SymbolQuote> SymbolQuotes(string token,[EnumeratorCancellation] CancellationToken cancellationToken)
+        public async IAsyncEnumerable<SymbolQuote> SymbolQuotes(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             _logger.LogInformation("Quotes Token => ", token);
             var client = _apiService.GetClient(/*Context.ConnectionId*/token);
-            if(client != null)
+            if (client != null)
             {
                 while (await client.MarketDataSnapshotFullRefreshChannel.Reader.WaitToReadAsync(cancellationToken))
                 {
@@ -340,22 +335,45 @@ namespace FixEngine.Hubs
         {
             _logger.LogInformation("Positions Token => ", token);
             var client = _apiService.GetClient(/*Context.ConnectionId*/token);
-            if(client != null )
+            if (client != null)
             {
                 while (await client.PositionReportChannel.Reader.WaitToReadAsync(cancellationToken))
                 {
                     while (client.PositionReportChannel.Reader.TryRead(out var position))
                     {
-                        yield return position;                        
+                        yield return position;
                     }
                 }
 
             }
         }
+
+        public async Task StreamSymbolQuotes(string token, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Streaming Symbol Quotes. Token => ", token);
+
+            var client = _apiService.GetClient(token);
+            if (client != null)
+            {
+                while (await client.MarketDataSnapshotFullRefreshChannel.Reader.WaitToReadAsync(cancellationToken))
+                {
+                    while (client.MarketDataSnapshotFullRefreshChannel.Reader.TryRead(out var symbolQuote))
+                    {
+                        // Stream each symbol quote to the caller
+                        await Clients.Caller.SendAsync("ReceiveSymbolQuote", symbolQuote, cancellationToken);
+                    }
+                }
+            }
+            else
+            {
+                _logger.LogWarning($"No client found for token {token}. Unable to stream symbol quotes.");
+                await Clients.Caller.SendAsync("ReceiveSymbolQuoteError", "Client not found.");
+            }
+        }
         public async IAsyncEnumerable<ExecutionReport> ExecutionReport(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var client = _apiService.GetClient(/*Context.ConnectionId*/token);
-            if(client != null)
+            if (client != null)
             {
                 while (await client.ExecutionReportChannel.Reader.WaitToReadAsync(cancellationToken))
                 {
@@ -367,12 +385,12 @@ namespace FixEngine.Hubs
                 }
 
             }
-        } 
+        }
         public async IAsyncEnumerable<ExecutionReport> Orders(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             _logger.LogInformation("Orders Token => ", token);
             var client = _apiService.GetClient(/*Context.ConnectionId*/token);
-            if(client != null)
+            if (client != null)
             {
                 while (await client.OrdersExecutionReportChannel.Reader.WaitToReadAsync(cancellationToken))
                 {

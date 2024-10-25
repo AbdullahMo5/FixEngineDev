@@ -49,6 +49,9 @@ builder.Services.AddSingleton<ApiService>();
 builder.Services.AddSingleton<SessionManager>();
 builder.Services.AddTransient<IApiKeyValidation, ApiKeyValidation>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRiskUserService, RiskUserService>();
+builder.Services.AddScoped<IGatewayService, GatewayService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

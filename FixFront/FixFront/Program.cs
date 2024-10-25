@@ -1,7 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using FixFront.Models;
+﻿using FixFront.Models;
 using Microsoft.AspNetCore.SignalR.Client;
+using RabbitMQ.Client;
+using System.Text;
+using System.Text.Json;
 
 class Program
 {
@@ -64,6 +65,24 @@ class Program
         await foreach (var quote in quotes)
         {
             Console.WriteLine($"Quote Symbol:{quote.SymbolName} Bid:{quote.Bid} Ask:{quote.Ask}");
+            var factory = new ConnectionFactory
+            {
+                HostName = "localhost",
+            };
+
+            var connectionRabbit = factory.CreateConnection();
+
+            using var channel = connectionRabbit.CreateModel();
+
+            channel.ConfirmSelect();
+
+            channel.QueueDeclare("booking-test04", durable: true, exclusive: false, autoDelete: false, arguments: null);
+
+            var jsonString = JsonSerializer.Serialize(quote);
+
+            var body = Encoding.UTF8.GetBytes(jsonString);
+
+            channel.BasicPublish(exchange: "", routingKey: "booking-test04", basicProperties: null, body: body);
         }
     }
 }

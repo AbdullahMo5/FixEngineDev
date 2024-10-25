@@ -8,6 +8,7 @@ using FixEngine.Shared;
 using Managers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -90,37 +91,55 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 }).AddEntityFrameworkStores<DatabaseContext>()
 .AddDefaultTokenProviders();
 
+builder.Services.AddControllers()
+            .ConfigureApiBehaviorOptions(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var errors = context.ModelState.Values
+                        .SelectMany(x => x.Errors)
+                        .Select(x => x.ErrorMessage)
+                        .ToArray();
+
+                    return new BadRequestObjectResult(new
+                    {
+                        Message = "Validation failed",
+                        Errors = errors
+                    });
+                };
+            });
+
 builder.Services.AddAuthorization();
 var app = builder.Build();
-ApiCredentials apiCredentials = new ApiCredentials(
-    QuoteHost: "crfuk.centroidsol.com",
-    TradeHost: "crfuk.centroidsol.com",
-    QuotePort: 53810,
-    TradePort: 53811,
-    QuoteSenderCompId: "MD_Fintic-FIX-TEST",
-    TradeSenderCompId: "TD_Fintic-FIX-TEST",
-    null,
-    null,
-    //QuoteSenderSubId: "testcentroid",// + token,
-    //TradeSenderSubId: "testcentroid",// + token,
-    QuoteTargetCompId: "CENTROID_SOL",
-    TradeTargetCompId: "CENTROID_SOL",
-    null,
-    null,
-    //QuoteTargetSubId: "QUOTE",
-    //TradeTargetSubId: "TRADE",
-    QuoteUsername: "Fintic-FIX-TEST",
-    QuotePassword: "#oB*sFb6",
-    TradeUsername: "Fintic-FIX-TEST",
-    TradePassword: "#oB*sFb6", //"123Nm,.com",
-    TradeResetOnLogin: "N",
-    TradeSsl: "Y",
-    QuoteResetOnLogin: "Y",
-    QuoteSsl: "N",
-    Account: "Fintic-Fix-Test"
-    );
-var apiService = app.Services.GetRequiredService<ApiService>();
-apiService.ConnectClient(apiCredentials, Guid.NewGuid().ToString(), "CENTROID");
+//ApiCredentials apiCredentials = new ApiCredentials(
+//    QuoteHost: "crfuk.centroidsol.com",
+//    TradeHost: "crfuk.centroidsol.com",
+//    QuotePort: 53810,
+//    TradePort: 53811,
+//    QuoteSenderCompId: "MD_Fintic-FIX-TEST",
+//    TradeSenderCompId: "TD_Fintic-FIX-TEST",
+//    null,
+//    null,
+//    //QuoteSenderSubId: "testcentroid",// + token,
+//    //TradeSenderSubId: "testcentroid",// + token,
+//    QuoteTargetCompId: "CENTROID_SOL",
+//    TradeTargetCompId: "CENTROID_SOL",
+//    null,
+//    null,
+//    //QuoteTargetSubId: "QUOTE",
+//    //TradeTargetSubId: "TRADE",
+//    QuoteUsername: "Fintic-FIX-TEST",
+//    QuotePassword: "#oB*sFb6",
+//    TradeUsername: "Fintic-FIX-TEST",
+//    TradePassword: "#oB*sFb6", //"123Nm,.com",
+//    TradeResetOnLogin: "N",
+//    TradeSsl: "Y",
+//    QuoteResetOnLogin: "Y",
+//    QuoteSsl: "N",
+//    Account: "Fintic-Fix-Test"
+//    );
+//var apiService = app.Services.GetRequiredService<ApiService>();
+//await apiService.ConnectClient(apiCredentials, Guid.NewGuid().ToString(), "CENTROID");
 
 app.UseSerilogRequestLogging();
 app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/secure"), appBuilder =>
@@ -144,6 +163,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

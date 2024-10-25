@@ -46,61 +46,61 @@ namespace FixEngine.Hubs
         }
         public async Task ConnectCentroid(string token)
         {
-            _logger.LogInformation("Connecting centroid client with token => ", token);
-            if (string.IsNullOrEmpty(token))
-            {
-                _logger.LogError("Connecting failed. Reason: Token is null or empty");
-                await Clients.Caller.SendAsync("Disconnected");
-            }
-            bool sessionValid = _sessionManager.IsExist(token);
-            if (!sessionValid)
-            {
-                _logger.LogError("Client FIX Connection failed. Reason: Invalid session token");
-                await Clients.Caller.SendAsync("Disconnected");
-                return;
-            }
-            var client = _apiService.GetClient(token);
-            if (client == null)
-            {
-                //check if session exists
-                ApiCredentials apiCredentials = new ApiCredentials(
-                    QuoteHost: "crfuk.centroidsol.com",
-                    TradeHost: "crfuk.centroidsol.com",
-                    QuotePort: 53810,
-                    TradePort: 53811,
-                    QuoteSenderCompId: "MD_Fintic-FIX-TEST",
-                    TradeSenderCompId: "TD_Fintic-FIX-TEST",
-                    null,
-                    null,
-                    //QuoteSenderSubId: "testcentroid",// + token,
-                    //TradeSenderSubId: "testcentroid",// + token,
-                    QuoteTargetCompId: "CENTROID_SOL",
-                    TradeTargetCompId: "CENTROID_SOL",
-                    null,
-                    null,
-                    //QuoteTargetSubId: "QUOTE",
-                    //TradeTargetSubId: "TRADE",
-                    QuoteUsername: "Fintic-FIX-TEST",
-                    QuotePassword: "#oB*sFb6",
-                    TradeUsername: "Fintic-FIX-TEST",
-                    TradePassword: "#oB*sFb6", //"123Nm,.com",
-                    TradeResetOnLogin: "N",
-                    TradeSsl: "Y",
-                    QuoteResetOnLogin: "Y",
-                    QuoteSsl: "N",
-                    Account: "Fintic-Fix-Test"
-                    );
-                _logger.LogInformation("Connecting... |" + token);
-                _apiService.ConnectClient(apiCredentials, token, "CENTROID");
-                _logger.LogInformation("Connected succcessfully");
+            //_logger.LogInformation("Connecting centroid client with token => ", token);
+            //if (string.IsNullOrEmpty(token))
+            //{
+            //    _logger.LogError("Connecting failed. Reason: Token is null or empty");
+            //    await Clients.Caller.SendAsync("Disconnected");
+            //}
+            //bool sessionValid = _sessionManager.IsExist(token);
+            //if (!sessionValid)
+            //{
+            //    _logger.LogError("Client FIX Connection failed. Reason: Invalid session token");
+            //    await Clients.Caller.SendAsync("Disconnected");
+            //    return;
+            //}
+            //var client = _apiService.GetClient(token);
+            //if (client == null)
+            //{
+            //check if session exists
+            ApiCredentials apiCredentials = new ApiCredentials(
+                QuoteHost: "crfuk.centroidsol.com",
+                TradeHost: "crfuk.centroidsol.com",
+                QuotePort: 53810,
+                TradePort: 53811,
+                QuoteSenderCompId: "MD_Fintic-FIX-TEST",
+                TradeSenderCompId: "TD_Fintic-FIX-TEST",
+                null,
+                null,
+                //QuoteSenderSubId: "testcentroid",// + token,
+                //TradeSenderSubId: "testcentroid",// + token,
+                QuoteTargetCompId: "CENTROID_SOL",
+                TradeTargetCompId: "CENTROID_SOL",
+                null,
+                null,
+                //QuoteTargetSubId: "QUOTE",
+                //TradeTargetSubId: "TRADE",
+                QuoteUsername: "Fintic-FIX-TEST",
+                QuotePassword: "#oB*sFb6",
+                TradeUsername: "Fintic-FIX-TEST",
+                TradePassword: "#oB*sFb6", //"123Nm,.com",
+                TradeResetOnLogin: "N",
+                TradeSsl: "Y",
+                QuoteResetOnLogin: "Y",
+                QuoteSsl: "N",
+                Account: "Fintic-Fix-Test"
+                );
+            _logger.LogInformation("Connecting... |" + token);
+            _apiService.ConnectClient(apiCredentials, token, "CENTROID");
+            _logger.LogInformation("Connected succcessfully");
 
-                await Clients.Caller.SendAsync("Connected");
+            await Clients.Caller.SendAsync("Connected");
 
-            }
-            else
-            {
-                await Clients.Caller.SendAsync("Connected");
-            }
+            //}
+            //else
+            //{
+            //    await Clients.Caller.SendAsync("Connected");
+            //}
 
         }
         public async Task ConnectCtrader(string token)

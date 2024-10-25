@@ -52,8 +52,7 @@ namespace FixEngine.Services
             var tradeLogFactory = new QuickFix.FileLogFactory(tradeSettings);
             var quoteStoreFactory = new FileStoreFactory(quoteSettings);
 
-            var quoteLogFactory1 = new QuickFix.FileLogFactory(quoteSettings);
-            var quoteLogFactory = new QuickFix.ScreenLogFactory(quoteSettings);
+            var quoteLogFactory = new QuickFix.FileLogFactory(quoteSettings);
 
             _tradeInitiator = new(_tradeApp, tradeStoreFactory, tradeSettings, tradeLogFactory);
             _quoteInitiator = new(_quoteApp, quoteStoreFactory, quoteSettings, quoteLogFactory);
@@ -78,7 +77,6 @@ namespace FixEngine.Services
                 _tradeInitiator.Start();
                 Console.WriteLine($"Starting market data session on url: {_credentials.QuoteHost} port: {_credentials.QuotePort}");
                 _quoteInitiator.Start();
-
             }
             catch (Exception ex)
             {

@@ -1,10 +1,8 @@
 ﻿using FixEngine.Enums;
 using FixEngine.Models;
-using FixEngine.Resources;
 using FixEngine.Services;
 using FixEngine.Shared;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace FixEngine.Controllers
 {
@@ -24,42 +22,31 @@ namespace FixEngine.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register(CreateUserRequestModel createUser)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var result = await _authService.Register(createUser);
 
             if (result == RegisterState.EmailAlreadyExist)
-                return BadRequest($"{createUser.Email} is already exist");
+                return BadRequest(new CustomErrorResponse("Registration failed", new[] { $"{createUser.Email} is already exist" }));
 
             if (result == RegisterState.Failed)
-                return BadRequest("Something went wrong");
+                return BadRequest(new CustomErrorResponse("Registration failed", new[] { "Something went wrong" }));
 
-            return Ok("registration is successful");
+            return Ok(new { data = "registration is successful" });
         }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginRequestModel loginModel)
         {
-            if (loginModel.Email.IsNullOrEmpty())
-            {
-                ModelState.AddModelError("message", "Email can not be null");
-                return BadRequest(ModelState);
-            }
-
             var token = await _authService.Login(loginModel.Email, loginModel.Password);
 
             if (token == null)
-            {
+                return BadRequest(new CustomErrorResponse("Login failed", new[] { " Email Or Password incorrect" }));
 
-                ModelState.AddModelError("message", "Email Or Password incorrect");
-                return BadRequest(ModelState);
-            }
+            Console.WriteLine(_sessionManager.GetSession(token));
 
-            _sessionManager.AddSession(token, new UserResource("123", loginModel.Email, "Mo5", "Kareem"));
-
-            return Ok(token);
+            return Ok(new { data = token });
         }
 
     }
+
+    internal record CustomErrorResponse(string Message, string[] Errors);
 }

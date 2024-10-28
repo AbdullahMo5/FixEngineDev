@@ -17,9 +17,10 @@ namespace FixEngine.Services
             return await _context.SaveChangesAsync();
         }
 
-        public Task Delete(int id)
+        public async Task Delete(T entity)
         {
-            throw new NotImplementedException();
+            _context.Set<T>().Remove(entity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
@@ -28,11 +29,11 @@ namespace FixEngine.Services
         public async Task<T?> GetByIdAsync(int id)
             => await _context.Set<T>().FindAsync(id);
 
-        public Task Update(T entity)
+        public async Task Update(T entity)
         {
-            throw new NotImplementedException();
+            _context.Set<T>().Update(entity);
+            await _context.SaveChangesAsync();
         }
-
 
     }
 }

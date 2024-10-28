@@ -1,12 +1,14 @@
 ﻿using FixFront.Models;
+using FixFront.Services;
+using InfluxDB.Client.Api.Domain;
+using InfluxDB.Client.Writes;
 using Microsoft.AspNetCore.SignalR.Client;
-using RabbitMQ.Client;
-using System.Text;
 using System.Text.Json;
 
 class Program
 {
     private static HubConnection connection;
+    private static InfluxDBService _service = new InfluxDBService();
 
     static async Task Main(string[] args)
     {
@@ -64,25 +66,55 @@ class Program
 
         await foreach (var quote in quotes)
         {
+
             Console.WriteLine($"Quote Symbol:{quote.SymbolName} Bid:{quote.Bid} Ask:{quote.Ask}");
-            var factory = new ConnectionFactory
+
+            _service.Write(write =>
             {
-                HostName = "localhost",
-            };
+                DateTime original = DateTime.Now; // Current date and time
 
-            var connectionRabbit = factory.CreateConnection();
+                // Round down to the nearest 10 minutes
+                int minutes = original.Minute / 10 * 10;
+                DateTime truncated = new DateTime(
+                    original.Year,
+                    original.Month,
+                    original.Day,
+                    original.Hour,
+                    original.Minute,   // Use the rounded minute value
+                    0          // Set seconds to 0
+                );
 
-            using var channel = connectionRabbit.CreateModel();
+                //var point = PointData.Measurement($"Symbols-{truncated}")
+                var point = PointData.Measurement($"Symbols-{truncated}")
+                    .Tag("Id", quote.SymbolId.ToString())
+                    .Field("symbolObject", JsonSerializer.Serialize(quote))
+                    //.Field("BId", symbol.Bid)
+                    //.Field("ASK", symbol.Ask)
+                    //.Field("Digits", symbol.Digits)
+                    .Timestamp(DateTime.Now, WritePrecision.Ms);
 
-            channel.ConfirmSelect();
+                write.WritePoint(point, "Symbols", "organization");
+                //    channel.BasicAck(deliveryTag: eventArgs.DeliveryTag, multiple: false);
+                //    Console.WriteLine($"Symbol has been added{symbol.SymbolId}");
+                //    var factory = new ConnectionFactory
+                //{
+                //    HostName = "localhost",
+                //};
 
-            channel.QueueDeclare("booking-test04", durable: true, exclusive: false, autoDelete: false, arguments: null);
+                //var connectionRabbit = factory.CreateConnection();
 
-            var jsonString = JsonSerializer.Serialize(quote);
+                //using var channel = connectionRabbit.CreateModel();
 
-            var body = Encoding.UTF8.GetBytes(jsonString);
+                //channel.ConfirmSelect();
 
-            channel.BasicPublish(exchange: "", routingKey: "booking-test04", basicProperties: null, body: body);
+                //channel.QueueDeclare("booking-test04", durable: true, exclusive: false, autoDelete: false, arguments: null);
+
+                //var jsonString = JsonSerializer.Serialize(quote);
+
+                //var body = Encoding.UTF8.GetBytes(jsonString);
+
+                //channel.BasicPublish(exchange: "", routingKey: "booking-test04", basicProperties: null, body: body);
+            });
         }
     }
 }

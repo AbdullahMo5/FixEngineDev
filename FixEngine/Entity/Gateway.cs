@@ -1,6 +1,6 @@
 ﻿namespace FixEngine.Entity
 {
-    public enum GatewayType { A_book, B_book }
+    public enum GatewayType { ABook, BBook }
     public class Gateway
     {
         public int Id { get; set; }

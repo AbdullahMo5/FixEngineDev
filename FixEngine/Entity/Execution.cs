@@ -8,7 +8,7 @@ namespace FixEngine.Entity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; set; }
+        public int Id { get; set; }
         [Column(TypeName = "varchar(200)")]
         public string ExecId { get; set; }
         [Column(TypeName = "varchar(200)")]

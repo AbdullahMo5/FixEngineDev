@@ -3,6 +3,7 @@ using FixFront.Services;
 using InfluxDB.Client.Api.Domain;
 using InfluxDB.Client.Writes;
 using Microsoft.AspNetCore.SignalR.Client;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 class Program
@@ -12,7 +13,18 @@ class Program
 
     static async Task Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        Console.WriteLine("Login");
+
+        var token = await AuthenticateAsync("https://localhost:7261/api/Auth/Login", "user@example.com", "Pass!123");
+        if (token != null)
+        {
+            Console.WriteLine("Login successful! Token stored.");
+        }
+        else
+        {
+            return;
+            Console.WriteLine("Login failed.");
+        }
 
         connection = new HubConnectionBuilder()
             .WithUrl("https://localhost:7261/trade")
@@ -43,13 +55,13 @@ class Program
         Console.WriteLine("Connected to the Trade Hub");
 
         await connection.InvokeAsync("Ping");
-        await connection.InvokeAsync("ConnectCentroid", "AliTest");
+        await connection.InvokeAsync("ConnectCentroid", token);
 
-        //await connection.InvokeAsync("Test", "AliTest");
+        //await connection.InvokeAsync("Test", token);
 
         var cts = new CancellationTokenSource();
 
-        await FetchQuotes(connection, "AliTest", cts.Token);
+        await FetchQuotes(connection, token, cts.Token);
 
         Console.WriteLine("Enter trade info to send (or 'exit' to quit):");
         Console.ReadLine();
@@ -68,6 +80,29 @@ class Program
         {
 
             Console.WriteLine($"Quote Symbol:{quote.SymbolName} Bid:{quote.Bid} Ask:{quote.Ask}");
+
+            //Console.WriteLine($"Symbol has been added{quote.SymbolId}");
+            //var factory = new ConnectionFactory
+            //{
+            //    HostName = "localhost",
+            //};
+
+            //var connectionRabbit = factory.CreateConnection();
+
+            //using var channel = connectionRabbit.CreateModel();
+
+            //channel.ConfirmSelect();
+
+            //channel.QueueDeclare("booking-test04", durable: true, exclusive: false, autoDelete: false, arguments: null);
+
+            //var rec = new QouteWithTime(quote.SymbolId, quote.SymbolName, quote.Bid, quote.Ask, quote.Digits, DateTime.UtcNow);
+
+            //var jsonString = JsonSerializer.Serialize(rec);
+
+            //var body = Encoding.UTF8.GetBytes(jsonString);
+
+            //channel.BasicPublish(exchange: "", routingKey: "booking-test04", basicProperties: null, body: body);
+
 
             _service.Write(write =>
             {
@@ -94,27 +129,47 @@ class Program
                     .Timestamp(DateTime.Now, WritePrecision.Ms);
 
                 write.WritePoint(point, "Symbols", "organization");
-                //    channel.BasicAck(deliveryTag: eventArgs.DeliveryTag, multiple: false);
-                //    Console.WriteLine($"Symbol has been added{symbol.SymbolId}");
-                //    var factory = new ConnectionFactory
-                //{
-                //    HostName = "localhost",
-                //};
 
-                //var connectionRabbit = factory.CreateConnection();
-
-                //using var channel = connectionRabbit.CreateModel();
-
-                //channel.ConfirmSelect();
-
-                //channel.QueueDeclare("booking-test04", durable: true, exclusive: false, autoDelete: false, arguments: null);
-
-                //var jsonString = JsonSerializer.Serialize(quote);
-
-                //var body = Encoding.UTF8.GetBytes(jsonString);
-
-                //channel.BasicPublish(exchange: "", routingKey: "booking-test04", basicProperties: null, body: body);
             });
         }
+    }
+
+    public record QouteWithTime(int SymbolId,
+     string SymbolName,
+     decimal Bid,
+     decimal Ask,
+     int Digits,
+     DateTime Time);
+
+    public static async Task<string> AuthenticateAsync(string url, string email, string password)
+    {
+        using var client = new HttpClient();
+
+        var loginData = new
+        {
+            email,
+            Password = password
+        };
+
+        var response = await client.PostAsJsonAsync(url, loginData);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var responseData = await response.Content.ReadFromJsonAsync<LoginResponse>();
+            var token = responseData?.Data;
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                //StoreToken(token);
+                return token;
+            }
+        }
+
+        return null;
+    }
+
+    public class LoginResponse
+    {
+        public string Data { get; set; }
     }
 }

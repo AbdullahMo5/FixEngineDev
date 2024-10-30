@@ -1,5 +1,6 @@
 ﻿using FixEngine.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace FixEngine.Services
 {
@@ -17,10 +18,10 @@ namespace FixEngine.Services
             return await _context.SaveChangesAsync();
         }
 
-        public async Task Delete(T entity)
+        public async Task<int> Delete(T entity)
         {
             _context.Set<T>().Remove(entity);
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
@@ -29,10 +30,13 @@ namespace FixEngine.Services
         public async Task<T?> GetByIdAsync(int id)
             => await _context.Set<T>().FindAsync(id);
 
-        public async Task Update(T entity)
+        public async Task<bool> IsExist(Expression<Func<T, bool>> predicate)
+            => await _context.Set<T>().AnyAsync(predicate);
+
+        public async Task<int> Update(T entity)
         {
             _context.Set<T>().Update(entity);
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
     }

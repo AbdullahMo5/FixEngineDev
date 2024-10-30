@@ -6,5 +6,6 @@ namespace FixEngine.Entity
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public List<RiskUser> RiskUsers { get; set; } = new List<RiskUser>();
     }
 }

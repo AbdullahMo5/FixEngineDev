@@ -17,11 +17,10 @@ using Serilog.Formatting.Json;
 using Services;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Log = Serilog.Log;
 
 var builder = WebApplication.CreateBuilder(args);
-//cors policy setup
-//https://learn.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-8.0
 //Serilog initialize
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -32,19 +31,37 @@ Log.Logger = new LoggerConfiguration()
 
 // Add services to the container.
 builder.Host.UseSerilog();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+}).ConfigureApiBehaviorOptions(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState.Values
+            .SelectMany(x => x.Errors)
+            .Select(x => x.ErrorMessage)
+            .ToArray();
+
+        return new BadRequestObjectResult(new
+        {
+            Message = "Validation failed",
+            Errors = errors
+        });
+    };
+}); ;
+builder.Services.AddDbContext<DatabaseContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+}, ServiceLifetime.Singleton);
+
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<LoginService>();
 builder.Services.AddSingleton<AccountService>();
 builder.Services.AddSingleton<ExecutionService>();
 builder.Services.AddSingleton<SymbolService>();
 builder.Services.AddSingleton<ExecutionManager>();
-
-builder.Services.AddDbContext<DatabaseContext>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-}, ServiceLifetime.Singleton);
 builder.Services.AddSingleton<ApiService>();
 builder.Services.AddSingleton<SessionManager>();
 builder.Services.AddTransient<IApiKeyValidation, ApiKeyValidation>();
@@ -52,7 +69,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRiskUserService, RiskUserService>();
 builder.Services.AddScoped<IGatewayService, GatewayService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
-
+builder.Services.AddScoped<ISymbolService, SymbolService>();
+builder.Services.AddScoped<IPasswordHasher<RiskUser>, PasswordHasher<RiskUser>>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -66,25 +85,6 @@ builder.Services.AddSignalR(options =>
     options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"])),
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true
-    };
-});
-
 builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 {
     opt.Password.RequireDigit = true;
@@ -94,55 +94,29 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 }).AddEntityFrameworkStores<DatabaseContext>()
 .AddDefaultTokenProviders();
 
-builder.Services.AddControllers()
-            .ConfigureApiBehaviorOptions(options =>
-            {
-                options.InvalidModelStateResponseFactory = context =>
-                {
-                    var errors = context.ModelState.Values
-                        .SelectMany(x => x.Errors)
-                        .Select(x => x.ErrorMessage)
-                        .ToArray();
+builder.Services.AddAuthentication(opt =>
+{
+    opt.DefaultAuthenticateScheme =
+  opt.DefaultChallengeScheme =
+  opt.DefaultForbidScheme =
+  opt.DefaultScheme =
+  opt.DefaultSignInScheme =
+  opt.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidateAudience = false,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"])),
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true
+    };
+});
 
-                    return new BadRequestObjectResult(new
-                    {
-                        Message = "Validation failed",
-                        Errors = errors
-                    });
-                };
-            });
-
-builder.Services.AddAuthorization();
 var app = builder.Build();
-//ApiCredentials apiCredentials = new ApiCredentials(
-//    QuoteHost: "crfuk.centroidsol.com",
-//    TradeHost: "crfuk.centroidsol.com",
-//    QuotePort: 53810,
-//    TradePort: 53811,
-//    QuoteSenderCompId: "MD_Fintic-FIX-TEST",
-//    TradeSenderCompId: "TD_Fintic-FIX-TEST",
-//    null,
-//    null,
-//    //QuoteSenderSubId: "testcentroid",// + token,
-//    //TradeSenderSubId: "testcentroid",// + token,
-//    QuoteTargetCompId: "CENTROID_SOL",
-//    TradeTargetCompId: "CENTROID_SOL",
-//    null,
-//    null,
-//    //QuoteTargetSubId: "QUOTE",
-//    //TradeTargetSubId: "TRADE",
-//    QuoteUsername: "Fintic-FIX-TEST",
-//    QuotePassword: "#oB*sFb6",
-//    TradeUsername: "Fintic-FIX-TEST",
-//    TradePassword: "#oB*sFb6", //"123Nm,.com",
-//    TradeResetOnLogin: "N",
-//    TradeSsl: "Y",
-//    QuoteResetOnLogin: "Y",
-//    QuoteSsl: "N",
-//    Account: "Fintic-Fix-Test"
-//    );
-//var apiService = app.Services.GetRequiredService<ApiService>();
-//await apiService.ConnectClient(apiCredentials, Guid.NewGuid().ToString(), "CENTROID");
 
 app.UseSerilogRequestLogging();
 app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/secure"), appBuilder =>
@@ -165,8 +139,8 @@ app.UseCors(options =>
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-app.UseAuthorization();
 
+app.UseAuthorization();
 
 app.MapControllers();
 

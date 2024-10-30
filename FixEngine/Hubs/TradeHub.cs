@@ -2,6 +2,8 @@
 using FixEngine.Services;
 using FixEngine.Shared;
 using Managers;
+
+//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Services;
 using System.Runtime.CompilerServices;
@@ -9,6 +11,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace FixEngine.Hubs
 {
+    //[Authorize]
     public class TradeHub : Hub
     {
         private readonly ApiService _apiService;
@@ -24,7 +27,6 @@ namespace FixEngine.Hubs
             _executionService = executionService;
             _sessionManager = sessionManager;
         }
-
         public async Task Ping()
         {
 
@@ -46,7 +48,9 @@ namespace FixEngine.Hubs
         }
         public async Task ConnectCentroid(string token)
         {
-            //_logger.LogInformation("Connecting centroid client with token => ", token);
+
+            _logger.LogInformation("Connecting centroid client with token => ", token);
+
             //if (string.IsNullOrEmpty(token))
             //{
             //    _logger.LogError("Connecting failed. Reason: Token is null or empty");

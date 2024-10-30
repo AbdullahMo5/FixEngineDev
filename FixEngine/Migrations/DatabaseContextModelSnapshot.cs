@@ -93,9 +93,9 @@ namespace FixEngine.Migrations
 
             modelBuilder.Entity("FixEngine.Entity.Execution", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("AvgPx")
                         .HasColumnType("decimal(20,5)");
@@ -190,12 +190,15 @@ namespace FixEngine.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Gateways");
                 });
@@ -205,6 +208,10 @@ namespace FixEngine.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("GatewayId")
                         .HasColumnType("int");
@@ -218,7 +225,58 @@ namespace FixEngine.Migrations
 
                     b.HasIndex("GatewayId");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("FixEngine.Entity.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ClosePrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime>("CloseTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("EntryPrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime>("EntryTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("FinalLoss")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("FinalProfit")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("GatewayType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("RiskUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("StopLoss")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("TakeProfit")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RiskUserId");
+
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("FixEngine.Entity.RiskUser", b =>
@@ -226,6 +284,10 @@ namespace FixEngine.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(65,30)");
@@ -251,6 +313,8 @@ namespace FixEngine.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AppUserId");
+
                     b.HasIndex("GroupId");
 
                     b.ToTable("RiskUsers");
@@ -258,9 +322,9 @@ namespace FixEngine.Migrations
 
             modelBuilder.Entity("FixEngine.Entity.Symbol", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Digits")
                         .IsRequired()
@@ -453,13 +517,32 @@ namespace FixEngine.Migrations
                     b.Navigation("Gateway");
                 });
 
+            modelBuilder.Entity("FixEngine.Entity.Order", b =>
+                {
+                    b.HasOne("FixEngine.Entity.RiskUser", "RiskUser")
+                        .WithMany()
+                        .HasForeignKey("RiskUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RiskUser");
+                });
+
             modelBuilder.Entity("FixEngine.Entity.RiskUser", b =>
                 {
+                    b.HasOne("FixEngine.Entity.AppUser", "AppUser")
+                        .WithMany("RiskUsers")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("FixEngine.Entity.Group", "Group")
                         .WithMany()
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("AppUser");
 
                     b.Navigation("Group");
                 });
@@ -513,6 +596,11 @@ namespace FixEngine.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("FixEngine.Entity.AppUser", b =>
+                {
+                    b.Navigation("RiskUsers");
                 });
 #pragma warning restore 612, 618
         }

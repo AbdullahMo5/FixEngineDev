@@ -15,8 +15,5 @@ namespace FixEngine.Services
 
         public async Task<Group?> GetGroupByNameAsync(string groupName)
             => await _context.Groups.FirstOrDefaultAsync(g => g.Name.ToLower() == groupName.ToLower());
-
-        public async Task<bool> IsGroupExistsAsync(string groupName)
-            => await _context.Groups.AnyAsync(g => g.Name.ToLower() == groupName.ToLower());
     }
 }

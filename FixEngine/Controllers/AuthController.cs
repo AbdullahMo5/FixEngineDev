@@ -41,7 +41,7 @@ namespace FixEngine.Controllers
             if (token == null)
                 return BadRequest(new CustomErrorResponse("Login failed", new[] { " Email Or Password incorrect" }));
 
-            Console.WriteLine(_sessionManager.GetSession(token));
+            Console.WriteLine(_sessionManager.GetSession(token).Id);
 
             return Ok(new { data = token });
         }

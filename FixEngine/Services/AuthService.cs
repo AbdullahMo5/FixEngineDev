@@ -28,12 +28,13 @@ namespace FixEngine.Services
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]));
         }
 
-        private string GenerateToken(string email, string role)
+        private string GenerateToken(AppUser user, string role)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Email, user.Email),
                  new Claim(ClaimTypes.Role, role),
+                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256);
@@ -51,7 +52,7 @@ namespace FixEngine.Services
             var tokenHandler = new JwtSecurityTokenHandler();
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return Guid.NewGuid().ToString();
+            //return Guid.NewGuid().ToString();
             return tokenHandler.WriteToken(token);
         }
         public async Task<string> Login(string email, string password)
@@ -65,7 +66,7 @@ namespace FixEngine.Services
 
             if (!result.Succeeded)
                 return null;
-            var token = GenerateToken(email, "user");
+            var token = GenerateToken(user, "user");
             _sessionManager.AddSession(token, new Resources.UserResource(user.Id, email, user.FirstName, user.LastName));
 
             return token;

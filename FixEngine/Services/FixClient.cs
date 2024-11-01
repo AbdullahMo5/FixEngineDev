@@ -1,4 +1,5 @@
 ﻿using Common;
+using FixEngine.Simulation;
 using QuickFix;
 using QuickFix.Fields;
 using QuickFix.FIX44;
@@ -14,6 +15,8 @@ namespace FixEngine.Services
         private readonly SocketInitiator _quoteInitiator;
         private readonly SocketInitiator _tradeInitiator;
 
+        public readonly Simulator simulator;
+
         public readonly QuickFix44App _quoteApp;
         private readonly QuickFix44App _tradeApp;
 
@@ -24,8 +27,9 @@ namespace FixEngine.Services
 
         private ApiCredentials _credentials;
         private SymbolService _symbolService;
-        public FixClient(ApiCredentials credentials, string lp, SymbolService symbolService)
+        public FixClient(ApiCredentials credentials, string lp, SymbolService symbolService, OrderService orderService, PositionService positionsService)
         {
+            simulator = new Simulator(orderService, positionsService);
             _credentials = credentials;
             _account = credentials.Account;
             _symbolService = symbolService;

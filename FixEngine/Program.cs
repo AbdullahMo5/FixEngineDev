@@ -61,6 +61,8 @@ builder.Services.AddSingleton<LoginService>();
 builder.Services.AddSingleton<AccountService>();
 builder.Services.AddSingleton<ExecutionService>();
 builder.Services.AddSingleton<SymbolService>();
+builder.Services.AddSingleton<OrderService>();
+builder.Services.AddSingleton<PositionService>();
 builder.Services.AddSingleton<ExecutionManager>();
 builder.Services.AddSingleton<ApiService>();
 builder.Services.AddSingleton<SessionManager>();
@@ -70,8 +72,11 @@ builder.Services.AddScoped<IRiskUserService, RiskUserService>();
 builder.Services.AddScoped<IGatewayService, GatewayService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<ISymbolService, SymbolService>();
-builder.Services.AddScoped<IPasswordHasher<RiskUser>, PasswordHasher<RiskUser>>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IPositionService, PositionService>();
+builder.Services.AddScoped<IPasswordHasher<RiskUser>, PasswordHasher<RiskUser>>();
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

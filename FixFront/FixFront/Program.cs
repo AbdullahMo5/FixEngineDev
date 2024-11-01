@@ -86,29 +86,6 @@ class Program
 
             Console.WriteLine($"Quote Symbol:{quote.SymbolName} Bid:{quote.Bid} Ask:{quote.Ask}");
 
-            //Console.WriteLine($"Symbol has been added{quote.SymbolId}");
-            //var factory = new ConnectionFactory
-            //{
-            //    HostName = "localhost",
-            //};
-
-            //var connectionRabbit = factory.CreateConnection();
-
-            //using var channel = connectionRabbit.CreateModel();
-
-            //channel.ConfirmSelect();
-
-            //channel.QueueDeclare("booking-test04", durable: true, exclusive: false, autoDelete: false, arguments: null);
-
-            //var rec = new QouteWithTime(quote.SymbolId, quote.SymbolName, quote.Bid, quote.Ask, quote.Digits, DateTime.UtcNow);
-
-            //var jsonString = JsonSerializer.Serialize(rec);
-
-            //var body = Encoding.UTF8.GetBytes(jsonString);
-
-            //channel.BasicPublish(exchange: "", routingKey: "booking-test04", basicProperties: null, body: body);
-
-
             _service.Write(write =>
             {
                 DateTime original = DateTime.Now; // Current date and time

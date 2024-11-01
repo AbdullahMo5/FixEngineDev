@@ -279,6 +279,48 @@ namespace FixEngine.Migrations
                     b.ToTable("Orders");
                 });
 
+            modelBuilder.Entity("FixEngine.Entity.Position", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ClosePrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("EntryPrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Profit")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<int>("SymbolId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SymbolName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("TimeClose")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TradeSide")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("Volume")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("Positions");
+                });
+
             modelBuilder.Entity("FixEngine.Entity.RiskUser", b =>
                 {
                     b.Property<int>("Id")
@@ -526,6 +568,17 @@ namespace FixEngine.Migrations
                         .IsRequired();
 
                     b.Navigation("RiskUser");
+                });
+
+            modelBuilder.Entity("FixEngine.Entity.Position", b =>
+                {
+                    b.HasOne("FixEngine.Entity.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("FixEngine.Entity.RiskUser", b =>

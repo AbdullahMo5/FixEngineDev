@@ -8,16 +8,21 @@ namespace FixEngine.Services
         private ExecutionManager _executionManager;
         private SymbolService _symbolService;
         private ConcurrentDictionary<string, FixClient> _clients = new();
-        public ApiService(ILogger<ApiService> logger, ExecutionManager executionManager, SymbolService symbolService)
+        private OrderService _orderService;
+        private PositionService _positionsService;
+        public ApiService(ILogger<ApiService> logger, ExecutionManager executionManager,
+            SymbolService symbolService, OrderService orderService, PositionService positionsService)
         {
             _logger = logger;
-            _executionManager = executionManager;
-            _symbolService = symbolService;
+            //_executionManager = executionManager;
+            //_symbolService = symbolService;
+            _orderService = orderService;
+            _positionsService = positionsService;
 
         }
         public async Task ConnectClient(ApiCredentials apiCredentials, string id, string lp)
         {
-            var client = new FixClient(apiCredentials, lp, _symbolService);
+            var client = new FixClient(apiCredentials, lp, _symbolService, _orderService, _positionsService);
 
             client.Connect();
 

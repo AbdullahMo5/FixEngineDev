@@ -22,8 +22,8 @@ class Program
         }
         else
         {
-            return;
             Console.WriteLine("Login failed.");
+            return;
         }
 
         connection = new HubConnectionBuilder()
@@ -46,18 +46,11 @@ class Program
             Console.WriteLine($"Quotes => {data}");
         });
 
-        connection.On("Test", (object data) =>
-        {
-            Console.WriteLine($"Success => {data}");
-        });
-
         await connection.StartAsync();
         Console.WriteLine("Connected to the Trade Hub");
 
         await connection.InvokeAsync("Ping");
         await connection.InvokeAsync("ConnectCentroid", token);
-
-        //await connection.InvokeAsync("Test", token);
 
         var cts = new CancellationTokenSource();
 
@@ -80,29 +73,6 @@ class Program
         {
 
             Console.WriteLine($"Quote Symbol:{quote.SymbolName} Bid:{quote.Bid} Ask:{quote.Ask}");
-
-            //Console.WriteLine($"Symbol has been added{quote.SymbolId}");
-            //var factory = new ConnectionFactory
-            //{
-            //    HostName = "localhost",
-            //};
-
-            //var connectionRabbit = factory.CreateConnection();
-
-            //using var channel = connectionRabbit.CreateModel();
-
-            //channel.ConfirmSelect();
-
-            //channel.QueueDeclare("booking-test04", durable: true, exclusive: false, autoDelete: false, arguments: null);
-
-            //var rec = new QouteWithTime(quote.SymbolId, quote.SymbolName, quote.Bid, quote.Ask, quote.Digits, DateTime.UtcNow);
-
-            //var jsonString = JsonSerializer.Serialize(rec);
-
-            //var body = Encoding.UTF8.GetBytes(jsonString);
-
-            //channel.BasicPublish(exchange: "", routingKey: "booking-test04", basicProperties: null, body: body);
-
 
             _service.Write(write =>
             {

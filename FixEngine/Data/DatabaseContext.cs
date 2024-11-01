@@ -24,5 +24,6 @@ namespace FixEngine.Data
         public DbSet<Group> Groups { get; set; }
         public DbSet<Gateway> Gateways { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<Position> Positions { get; set; }
     }
 }

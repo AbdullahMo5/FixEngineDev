@@ -279,6 +279,36 @@ namespace FixEngine.Migrations
                     b.ToTable("Orders");
                 });
 
+            modelBuilder.Entity("FixEngine.Entity.Position", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ClosePrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("EntryPrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TimeClose")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Positions");
+                });
+
             modelBuilder.Entity("FixEngine.Entity.RiskUser", b =>
                 {
                     b.Property<int>("Id")
@@ -528,6 +558,17 @@ namespace FixEngine.Migrations
                     b.Navigation("RiskUser");
                 });
 
+            modelBuilder.Entity("FixEngine.Entity.Position", b =>
+                {
+                    b.HasOne("FixEngine.Entity.Order", "Order")
+                        .WithOne("Position")
+                        .HasForeignKey("FixEngine.Entity.Position", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("FixEngine.Entity.RiskUser", b =>
                 {
                     b.HasOne("FixEngine.Entity.AppUser", "AppUser")
@@ -601,6 +642,12 @@ namespace FixEngine.Migrations
             modelBuilder.Entity("FixEngine.Entity.AppUser", b =>
                 {
                     b.Navigation("RiskUsers");
+                });
+
+            modelBuilder.Entity("FixEngine.Entity.Order", b =>
+                {
+                    b.Navigation("Position")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

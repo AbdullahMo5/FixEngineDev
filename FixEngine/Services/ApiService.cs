@@ -1,4 +1,5 @@
-﻿using Managers;
+﻿using FixEngine.Data;
+using Managers;
 using System.Collections.Concurrent;
 namespace FixEngine.Services
 {
@@ -7,17 +8,21 @@ namespace FixEngine.Services
         private ILogger<ApiService> _logger;
         private ExecutionManager _executionManager;
         private SymbolService _symbolService;
+        private OrderService _orderService;
+        private PositionsService _positionsService;
         private ConcurrentDictionary<string, FixClient> _clients = new();
-        public ApiService(ILogger<ApiService> logger, ExecutionManager executionManager, SymbolService symbolService)
+        public ApiService(ILogger<ApiService> logger, ExecutionManager executionManager, SymbolService symbolService,
+            OrderService orderService, PositionsService positionsService)
         {
             _logger = logger;
             _executionManager = executionManager;
             _symbolService = symbolService;
-
+            _orderService = orderService;
+            _positionsService = positionsService;
         }
         public async Task ConnectClient(ApiCredentials apiCredentials, string id, string lp)
         {
-            var client = new FixClient(apiCredentials, lp, _symbolService);
+            var client = new FixClient(apiCredentials, lp, _symbolService, _orderService, _positionsService);
 
             client.Connect();
 

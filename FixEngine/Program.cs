@@ -114,6 +114,8 @@ builder.Services.AddAuthentication(opt =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true
     };
+
+
 });
 
 var app = builder.Build();

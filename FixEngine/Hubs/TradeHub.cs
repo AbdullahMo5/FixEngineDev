@@ -3,7 +3,7 @@ using FixEngine.Services;
 using FixEngine.Shared;
 using Managers;
 
-//using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Services;
 using System.Runtime.CompilerServices;
@@ -11,7 +11,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace FixEngine.Hubs
 {
-    //[Authorize]
+    [Authorize]
     public class TradeHub : Hub
     {
         private readonly ApiService _apiService;
@@ -29,7 +29,6 @@ namespace FixEngine.Hubs
         }
         public async Task Ping()
         {
-
             _logger.LogInformation("Pong... |", Context.ConnectionId);
             await Clients.Caller.SendAsync("Pong", "Pong");
         }
@@ -51,23 +50,23 @@ namespace FixEngine.Hubs
 
             _logger.LogInformation("Connecting centroid client with token => ", token);
 
-            //if (string.IsNullOrEmpty(token))
-            //{
-            //    _logger.LogError("Connecting failed. Reason: Token is null or empty");
-            //    await Clients.Caller.SendAsync("Disconnected");
-            //}
-            //bool sessionValid = _sessionManager.IsExist(token);
-            //if (!sessionValid)
-            //{
-            //    _logger.LogError("Client FIX Connection failed. Reason: Invalid session token");
-            //    await Clients.Caller.SendAsync("Disconnected");
-            //    return;
-            //}
-            //var client = _apiService.GetClient(token);
-            //if (client == null)
-            //{
-            //check if session exists
-            ApiCredentials apiCredentials = new ApiCredentials(
+            if (string.IsNullOrEmpty(token))
+            {
+                _logger.LogError("Connecting failed. Reason: Token is null or empty");
+                await Clients.Caller.SendAsync("Disconnected");
+            }
+            bool sessionValid = _sessionManager.IsExist(token);
+            if (!sessionValid)
+            {
+                _logger.LogError("Client FIX Connection failed. Reason: Invalid session token");
+                await Clients.Caller.SendAsync("Disconnected");
+                return;
+            }
+            var client = _apiService.GetClient(token);
+            if (client == null)
+            {
+                //check if session exists
+                ApiCredentials apiCredentials = new ApiCredentials(
                 QuoteHost: "crfuk.centroidsol.com",
                 TradeHost: "crfuk.centroidsol.com",
                 QuotePort: 53810,
@@ -94,17 +93,17 @@ namespace FixEngine.Hubs
                 QuoteSsl: "N",
                 Account: "Fintic-Fix-Test"
                 );
-            _logger.LogInformation("Connecting... |" + token);
-            _apiService.ConnectClient(apiCredentials, token, "CENTROID");
-            _logger.LogInformation("Connected succcessfully");
+                _logger.LogInformation("Connecting... |" + token);
+                _apiService.ConnectClient(apiCredentials, token, "CENTROID");
+                _logger.LogInformation("Connected succcessfully");
 
-            await Clients.Caller.SendAsync("Connected");
+                await Clients.Caller.SendAsync("Connected");
 
-            //}
-            //else
-            //{
-            //    await Clients.Caller.SendAsync("Connected");
-            //}
+            }
+            else
+            {
+                await Clients.Caller.SendAsync("Connected");
+            }
 
         }
         public async Task ConnectCtrader(string token)

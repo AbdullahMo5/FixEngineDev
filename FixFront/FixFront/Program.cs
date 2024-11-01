@@ -10,12 +10,14 @@ class Program
 {
     private static HubConnection connection;
     private static InfluxDBService _service = new InfluxDBService();
+    private const string _baseUrl = "https://localhost:7261";
+    //private const string _baseUrl = "http://20.67.34.118:88";
 
     static async Task Main(string[] args)
     {
         Console.WriteLine("Login");
 
-        var token = await AuthenticateAsync("https://localhost:7261/api/Auth/Login", "user@example.com", "Pass!123");
+        var token = await AuthenticateAsync($"{_baseUrl}/api/Auth/Login", "user@example.com", "Pass!123");
         if (token != null)
         {
             Console.WriteLine("Login successful! Token stored.");
@@ -27,7 +29,10 @@ class Program
         }
 
         connection = new HubConnectionBuilder()
-            .WithUrl("https://localhost:7261/trade")
+            .WithUrl($"{_baseUrl}/trade", opt =>
+            {
+                opt.AccessTokenProvider = () => Task.FromResult(token);
+            })
             .WithAutomaticReconnect()
             .Build();
 

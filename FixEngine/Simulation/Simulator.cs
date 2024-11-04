@@ -72,7 +72,7 @@ namespace FixEngine.Simulation
                 Status = newOrderRequest.TradeSide
             };
 
-            var riskUser = 
+            //var riskUser = 
             await _orderService.AddAsync(newOrder);
             lock (posList)
             {

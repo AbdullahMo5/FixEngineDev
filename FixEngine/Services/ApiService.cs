@@ -15,8 +15,8 @@ namespace FixEngine.Services
             SymbolService symbolService, OrderService orderService, PositionService positionsService, RiskUserService riskUserService)
         {
             _logger = logger;
-            //_executionManager = executionManager;
-            //_symbolService = symbolService;
+            _executionManager = executionManager;
+            _symbolService = symbolService;
             _orderService = orderService;
             _positionsService = positionsService;
             _riskUserService = riskUserService;

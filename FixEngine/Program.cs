@@ -63,6 +63,7 @@ builder.Services.AddSingleton<ExecutionService>();
 builder.Services.AddSingleton<SymbolService>();
 builder.Services.AddSingleton<OrderService>();
 builder.Services.AddSingleton<PositionService>();
+builder.Services.AddSingleton<RiskUserService>();
 builder.Services.AddSingleton<ExecutionManager>();
 builder.Services.AddSingleton<ApiService>();
 builder.Services.AddSingleton<SessionManager>();

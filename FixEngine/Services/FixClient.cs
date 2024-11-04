@@ -27,9 +27,9 @@ namespace FixEngine.Services
 
         private ApiCredentials _credentials;
         private SymbolService _symbolService;
-        public FixClient(ApiCredentials credentials, string lp, SymbolService symbolService, OrderService orderService, PositionService positionsService)
+        public FixClient(ApiCredentials credentials, string lp, SymbolService symbolService, OrderService orderService, PositionService positionsService, RiskUserService riskUserService)
         {
-            simulator = new Simulator(orderService, positionsService);
+            simulator = new Simulator(orderService, positionsService, riskUserService);
             _credentials = credentials;
             _account = credentials.Account;
             _symbolService = symbolService;
@@ -543,6 +543,7 @@ namespace FixEngine.Services
         public DateTime? Expiry { get; init; }
 
         public long? PositionId { get; init; }
+        public long RiskUserId { get; init; }
 
         public string Designation { get; init; }
     }

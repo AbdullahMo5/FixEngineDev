@@ -11,8 +11,10 @@ namespace FixEngine.Simulation
         #region Fields
         private OrderService _orderService;
         private PositionService _positionsService;
+        private RiskUserService _riskUserService;
 
         private readonly ConcurrentDictionary<int?, List<Position>> positionsBook = new ConcurrentDictionary<int?, List<Position>>();
+        private readonly ConcurrentDictionary<int, RiskUser> riskUserBook = new ConcurrentDictionary<int, RiskUser>();
 
         private readonly BufferBlock<Common.SymbolQuote> _quoteBuffer = new();
 
@@ -20,13 +22,14 @@ namespace FixEngine.Simulation
         public Channel<ExecutionReport> orderReportChannel { get; } = Channel.CreateUnbounded<ExecutionReport>();
         #endregion
 
-        public Simulator(OrderService orderService, PositionService positionsService)
+        public Simulator(OrderService orderService, PositionService positionsService, RiskUserService riskUserService)
         {
             var incomingPrice = new ActionBlock<Common.SymbolQuote>(Simulation);
             var linkOptions = new DataflowLinkOptions { PropagateCompletion = true };
             _quoteBuffer.LinkTo(incomingPrice, linkOptions);
             _orderService = orderService;
             _positionsService = positionsService;
+            _riskUserService = riskUserService;
         }
 
         public async Task SaveNewPrice(Common.SymbolQuote quote)
@@ -41,6 +44,11 @@ namespace FixEngine.Simulation
             closPose.TradeSide = closPose.TradeSide == "buy" ? "sell" : "buy";
             //Send Close Pose to database
             await _positionsService.AddAsync(closPose);
+            //Add Profit to balance
+            var riskUser = await _riskUserService.GetByIdAsync(closePosition.RiskUserId);
+            if (riskUser == null) return null;
+            riskUser.Balance += closePosition.Profit;
+            await _riskUserService.Update(riskUser);
             //Remove Pose from Ram
             positionsBook[closePosition.SymbolId].Remove(closPose);
 
@@ -64,6 +72,7 @@ namespace FixEngine.Simulation
                 Status = newOrderRequest.TradeSide
             };
 
+            var riskUser = 
             await _orderService.AddAsync(newOrder);
             lock (posList)
             {
@@ -99,6 +108,13 @@ namespace FixEngine.Simulation
             {
                 Console.WriteLine($"Error in Simulation: {ex.Message}");
             }
+        }
+
+        public void FixBalance(int RiskUserID, decimal newBalance)
+        {
+            if (!riskUserBook.ContainsKey(RiskUserID)) return;
+
+            riskUserBook[RiskUserID].Balance = newBalance;
         }
     }
 }

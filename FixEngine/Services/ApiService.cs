@@ -10,19 +10,20 @@ namespace FixEngine.Services
         private ConcurrentDictionary<string, FixClient> _clients = new();
         private OrderService _orderService;
         private PositionService _positionsService;
+        private RiskUserService _riskUserService;
         public ApiService(ILogger<ApiService> logger, ExecutionManager executionManager,
-            SymbolService symbolService, OrderService orderService, PositionService positionsService)
+            SymbolService symbolService, OrderService orderService, PositionService positionsService, RiskUserService riskUserService)
         {
             _logger = logger;
             //_executionManager = executionManager;
             //_symbolService = symbolService;
             _orderService = orderService;
             _positionsService = positionsService;
-
+            _riskUserService = riskUserService;
         }
         public async Task ConnectClient(ApiCredentials apiCredentials, string id, string lp)
         {
-            var client = new FixClient(apiCredentials, lp, _symbolService, _orderService, _positionsService);
+            var client = new FixClient(apiCredentials, lp, _symbolService, _orderService, _positionsService, _riskUserService);
 
             client.Connect();
 

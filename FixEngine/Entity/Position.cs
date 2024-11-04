@@ -6,6 +6,7 @@
         public DateTime TimeClose { get; set; } = DateTime.UtcNow;
         public Order Order { get; set; }
         public int OrderId { get; set; }
+        public int RiskUserId { get; set; }
         public int SymbolId { get; set; }
         public string SymbolName { get; set; }
         public string TradeSide { get; set; }

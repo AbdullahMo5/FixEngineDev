@@ -91,5 +91,17 @@ namespace FixEngine.Controllers
                 return Ok("Deleted success");
             return BadRequest("Something went wrong");
         }
+
+        [AllowAnonymous]
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login(LoginRequestModel loginModel)
+        {
+            var token = await _riskUserService.Login(loginModel.Email, loginModel.Password);
+
+            if (token == null)
+                return BadRequest(new CustomErrorResponse("Login failed", new[] { " Email Or Password incorrect" }));
+
+            return Ok(new { data = token });
+        }
     }
 }

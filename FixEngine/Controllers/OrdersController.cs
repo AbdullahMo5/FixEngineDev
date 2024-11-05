@@ -1,7 +1,9 @@
 ﻿using FixEngine.Entity;
 using FixEngine.Models;
 using FixEngine.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FixEngine.Controllers
 {
@@ -31,10 +33,13 @@ namespace FixEngine.Controllers
             return Ok(order);
         }
 
+        [Authorize(Roles = "user")]
         [HttpPost]
         public async Task<IActionResult> Add(CreateOrderModel model)
         {
-            var x = _riskUserService.GetGatewayType(3);
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            var x = _riskUserService.GetGatewayType(int.Parse(userId));
             if (x == GatewayType.ABook)
                 return Ok("Send to centroid");
             var order = new Order

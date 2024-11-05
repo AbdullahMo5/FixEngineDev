@@ -10,7 +10,7 @@ namespace FixEngine.Services
                 new SymbolResource("1", "EURUSD", "CENTROID", "EURUSD", 5),
                 new SymbolResource("2", "GBPUSD", "CENTROID", "GBPUSD", 5),
                 new SymbolResource("3", "AUDUSD", "CENTROID", "AUDUSD", 5),
-                new SymbolResource("4", "USDJPY", "CENTROID", "USDJPY", 3),
+                new SymbolResource("4", "USDJPY", "CENTROID", "USDJPY", 5),
                 new SymbolResource("5", "USDCAD", "CENTROID", "USDCAD", 5),
                 new SymbolResource("6", "NZDUSD", "CENTROID", "NZDUSD", 5),
                 new SymbolResource("7", "USDCHF", "CENTROID", "USDCHF", 5),

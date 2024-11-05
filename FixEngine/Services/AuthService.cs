@@ -66,7 +66,7 @@ namespace FixEngine.Services
 
             if (!result.Succeeded)
                 return null;
-            var token = GenerateToken(user, "user");
+            var token = GenerateToken(user, "admin");
             _sessionManager.AddSession(token, new Resources.UserResource(user.Id, email, user.FirstName, user.LastName));
 
             return token;

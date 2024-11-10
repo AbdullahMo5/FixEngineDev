@@ -69,7 +69,8 @@ namespace FixEngine.Simulation
             var newOrder = new Order
             {
                 EntryPrice = newOrderRequest.TargetPrice,
-                Status = newOrderRequest.TradeSide
+                Status = newOrderRequest.TradeSide,
+                GatewayType = GatewayType.BBook.ToString(),
             };
 
             //var riskUser = 

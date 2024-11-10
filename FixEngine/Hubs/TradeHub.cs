@@ -406,5 +406,26 @@ namespace FixEngine.Hubs
 
             }
         }
+        #region Test
+        public void SendBOrderRequest(string token, NewOrderRequestParameters parameters)
+        {
+            var client = _apiService.GetClient(token);
+            client.simulator.ReceiveOrder(parameters);
+        }
+        public async IAsyncEnumerable<Entity.Position> StreamBPositions(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            var client = _apiService.GetClient(token);
+            if (client != null)
+            {
+                while (await client.simulator.positionChannel.Reader.WaitToReadAsync(cancellationToken))
+                {
+                    while (client.simulator.positionChannel.Reader.TryRead(out var position))
+                    {
+                        yield return position;
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }

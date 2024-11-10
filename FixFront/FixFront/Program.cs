@@ -24,8 +24,8 @@ class Program
         }
         else
         {
-            return;
             Console.WriteLine("Login failed.");
+            return;
         }
 
         connection = new HubConnectionBuilder()
@@ -62,17 +62,37 @@ class Program
         await connection.InvokeAsync("Ping");
         await connection.InvokeAsync("ConnectCentroid", token);
 
-        //await connection.InvokeAsync("Test", token);
+        var newOrder = new NewOrderRequestParameters("buy", "1", 1, "EURUSD", "buy", 10, 3.1m)
+        {
+            Expiry = DateTime.Now,
+            PositionId = 1,
+            Designation = "test"
+        };
+        await connection.InvokeAsync("SendBOrderRequest", token, newOrder);
 
         var cts = new CancellationTokenSource();
 
-        await FetchQuotes(connection, token, cts.Token);
+        //await FetchQuotes(connection, token, cts.Token);
+        await FetchPositions(connection, token, cts.Token);
 
         Console.WriteLine("Enter trade info to send (or 'exit' to quit):");
         Console.ReadLine();
 
         await connection.StopAsync();
         await connection.DisposeAsync();
+    }
+
+    static async Task FetchPositions(HubConnection connection, string token, CancellationToken cancellationToken)
+    {
+        var positions = connection.StreamAsync<Position>("StreamBPositions", token, cancellationToken);
+
+        Console.WriteLine("Fetching Positions!");
+
+        await foreach (var position in positions)
+        {
+            //rabbitMQService.Publish(position);
+            Console.WriteLine($"Position:{position.SymbolName} EntryPrice:{position.EntryPrice} PnL:{position.Profit}");
+        }
     }
 
     static async Task FetchQuotes(HubConnection connection, string token, CancellationToken cancellationToken)
@@ -114,6 +134,17 @@ class Program
 
             });
         }
+    }
+
+    public record NewOrderRequestParameters(string Type, string ClOrdId, int? SymbolId, string? SymbolName, string TradeSide, decimal Quantity, decimal TargetPrice)
+    {
+        //public double TargetPrice { get; init; }
+
+        public DateTime? Expiry { get; init; }
+
+        public long? PositionId { get; init; }
+
+        public string Designation { get; init; }
     }
 
     public record QouteWithTime(int SymbolId,

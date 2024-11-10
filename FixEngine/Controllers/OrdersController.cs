@@ -11,11 +11,13 @@ namespace FixEngine.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly IRiskUserService _riskUserService;
+        private readonly ApiService _apiService;
 
-        public OrdersController(IOrderService orderService, IRiskUserService riskUserService)
+        public OrdersController(IOrderService orderService, IRiskUserService riskUserService, ApiService apiService)
         {
             _orderService = orderService;
             _riskUserService = riskUserService;
+            _apiService = apiService;
         }
 
         [HttpGet("GetAll")]
@@ -32,11 +34,8 @@ namespace FixEngine.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(CreateOrderModel model)
+        public async Task<IActionResult> Add(string token, CreateOrderModel model)
         {
-            var x = _riskUserService.GetGatewayType(3);
-            if (x == GatewayType.ABook)
-                return Ok("Send to centroid");
             var order = new Order
             {
                 ClosePrice = model.ClosePrice,
@@ -46,10 +45,25 @@ namespace FixEngine.Controllers
                 FinalProfit = model.FinalProfit,
                 GatewayType = model.GatewayType,
                 RiskUserId = 3,
-                Status = model.Status,
                 StopLoss = model.StopLoss,
                 TakeProfit = model.TakeProfit,
             };
+
+            var orderRequest = new NewOrderRequestParameters(model.Type, model.ClOrdId, model.SymbolId, model.SymbolName, model.TradeSide
+                , model.Quantity, model.EntryPrice);
+
+            var x = _riskUserService.GetGatewayType(3);
+            var client = _apiService.GetClient(token);
+            if (client == null) return BadRequest("wrong Client");
+
+            switch (x) {
+                case GatewayType.ABook:
+                    client.SendNewOrderRequest(orderRequest);
+                    return Ok("Send to centroid");
+                case GatewayType.BBook:
+                    await client.simulator.ReceiveOrder(orderRequest);
+                    return Ok("Send to simulator");
+            }
 
             if (await _orderService.AddAsync(order) > 0)
                 return Ok(order);

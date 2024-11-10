@@ -19,6 +19,7 @@ namespace FixEngine.Services
             _symbolService = symbolService;
             _orderService = orderService;
             _positionsService = positionsService;
+            Console.WriteLine("hello world!");
             _riskUserService = riskUserService;
         }
         public async Task ConnectClient(ApiCredentials apiCredentials, string id, string lp)
@@ -30,7 +31,6 @@ namespace FixEngine.Services
             _clients.AddOrUpdate(id, client, (id, oldClient) => client);
             //ConsumeClient(id);
             //TODO: start consumer
-
         }
 
         public FixClient? GetClient(string id)

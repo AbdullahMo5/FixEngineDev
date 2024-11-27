@@ -216,10 +216,16 @@ namespace FixEngine.Migrations
                     b.Property<int>("GatewayId")
                         .HasColumnType("int");
 
+                    b.Property<int>("MarginCall")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
+
+                    b.Property<int>("StopOut")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -297,6 +303,9 @@ namespace FixEngine.Migrations
                     b.Property<decimal>("Profit")
                         .HasColumnType("decimal(65,30)");
 
+                    b.Property<int>("RiskUserId")
+                        .HasColumnType("int");
+
                     b.Property<int>("SymbolId")
                         .HasColumnType("int");
 
@@ -344,6 +353,9 @@ namespace FixEngine.Migrations
                     b.Property<string>("IP")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<int>("Leverage")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()

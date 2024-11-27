@@ -17,5 +17,6 @@
         public decimal TakeProfit { get; set; }
         public decimal FinalProfit { get; set; }
         public decimal FinalLoss { get; set; }
+        public int RiskUserId { get; set; }
     }
 }

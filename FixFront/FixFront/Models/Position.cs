@@ -7,6 +7,8 @@
 
         public int SymbolId { get; init; }
 
+        public int RiskUserId { get; set; }
+
         public string SymbolName { get; set; }
 
         public decimal EntryPrice { get; init; }

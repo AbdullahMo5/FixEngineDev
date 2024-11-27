@@ -1,4 +1,5 @@
 ﻿using FixEngine.Entity;
+using FixEngine.Models;
 using FixEngine.Services;
 using System.Collections.Concurrent;
 using System.Threading.Channels;
@@ -6,20 +7,20 @@ using System.Threading.Tasks.Dataflow;
 
 namespace FixEngine.Simulation
 {
-    public class Simulator
+    public class Simulator              //The code needs cleaning
     {
         #region Fields
         private OrderService _orderService;
         private PositionService _positionsService;
         private RiskUserService _riskUserService;
-
-        private readonly ConcurrentDictionary<int?, List<Position>> positionsBook = new ConcurrentDictionary<int?, List<Position>>();
-        private readonly ConcurrentDictionary<int, RiskUser> riskUserBook = new ConcurrentDictionary<int, RiskUser>();
+        private PositionSimulation positionSimulation;
+        private MarginSimulation marginSimulation;
 
         private readonly BufferBlock<Common.SymbolQuote> _quoteBuffer = new();
 
-        public Channel<Position> positionChannel { get; } = Channel.CreateUnbounded<Position>();
-        public Channel<ExecutionReport> orderReportChannel { get; } = Channel.CreateUnbounded<ExecutionReport>();
+        public Channel<Position> PositionChannel { get; } = Channel.CreateUnbounded<Position>();
+        public Channel<UserMargin> UserChannel { get; } = Channel.CreateUnbounded<UserMargin>();
+        public Channel<Margin> MarginChannel { get; } = Channel.CreateUnbounded<Margin>();
         #endregion
 
         public Simulator(OrderService orderService, PositionService positionsService, RiskUserService riskUserService)
@@ -30,92 +31,42 @@ namespace FixEngine.Simulation
             _orderService = orderService;
             _positionsService = positionsService;
             _riskUserService = riskUserService;
+            positionSimulation = new PositionSimulation(orderService, positionsService, riskUserService);
+            marginSimulation = new MarginSimulation(PositionChannel, UserChannel);
         }
 
+        #region Metods
         public async Task SaveNewPrice(Common.SymbolQuote quote)
         {
             await _quoteBuffer.SendAsync(quote);
+            //await Simulation(quote);
         }
+
         public async Task<Position> ClosePosition(Position closePosition)
+        => await positionSimulation.ClosePosition(closePosition); 
+
+        public void NewOrderRequest(NewOrderRequestParameters newOrderRequest, RiskUser user)
         {
-            var closPose = positionsBook[closePosition.SymbolId].FirstOrDefault(p => p.Id == closePosition.Id);
+            //positionSimulation.ReceiveOrder(newOrderRequest);
+            marginSimulation.ReceiveOrder(newOrderRequest, user);
 
-            //Close Pose
-            closPose.TradeSide = closPose.TradeSide == "buy" ? "sell" : "buy";
-            //Send Close Pose to database
-            await _positionsService.AddAsync(closPose);
-            //Add Profit to balance
-            var riskUser = await _riskUserService.GetByIdAsync(closePosition.RiskUserId);
-            if (riskUser == null) return null;
-            riskUser.Balance += closePosition.Profit;
-            await _riskUserService.Update(riskUser);
-            //Remove Pose from Ram
-            positionsBook[closePosition.SymbolId].Remove(closPose);
+            //var newOrder = new Order
+            //{
+            //    EntryPrice = newOrderRequest.TargetPrice,
+            //    Status = newOrderRequest.TradeSide,
+            //    GatewayType = GatewayType.BBook.ToString(),
+            //    RiskUserId = newOrderRequest.RiskUserId
+            //};
 
-            return closPose;
-        }
-
-        public async Task ReceiveOrder(NewOrderRequestParameters newOrderRequest)
-        {
-            var posList = positionsBook.GetOrAdd(newOrderRequest.SymbolId, _ => new List<Position>());
-            var newPos = new Position
-            {
-                EntryPrice = newOrderRequest.TargetPrice,
-                SymbolName = newOrderRequest.SymbolName,
-                SymbolId = newOrderRequest.SymbolId ?? 0,
-                TradeSide = newOrderRequest.TradeSide,
-                Volume = newOrderRequest.Quantity,
-            };
-            var newOrder = new Order
-            {
-                EntryPrice = newOrderRequest.TargetPrice,
-                Status = newOrderRequest.TradeSide,
-                GatewayType = GatewayType.BBook.ToString(),
-            };
-
-            //var riskUser = 
-            await _orderService.AddAsync(newOrder);
-            lock (posList)
-            {
-                posList.Add(newPos);
-            }
+            //await _orderService.AddAsync(newOrder);
         }
 
         private async Task Simulation(Common.SymbolQuote quote)
         {
-            try
-            {
-                bool keyExict = positionsBook.ContainsKey(quote.SymbolId);
-                if (!keyExict) return;
-
-                foreach (var position in positionsBook[quote.SymbolId])
-                {
-                    decimal pNl;
-
-                    if (position.TradeSide.ToLowerInvariant() == "buy")
-                    {
-                        pNl = position.EntryPrice - quote.Ask * position.Volume; //Check the logic
-                    }
-                    else
-                    {
-                        pNl = position.EntryPrice - quote.Bid * position.Volume; //Check the logic
-                    }
-                    position.Profit = pNl;
-
-                    await positionChannel.Writer.WriteAsync(position);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in Simulation: {ex.Message}");
-            }
+            //await positionSimulation.Simulation(quote, PositionChannel);
+            //Console.WriteLine($"Simulate: {quote.SymbolName}");
+            await marginSimulation.Simulation(quote);
         }
-
-        public void FixBalance(int RiskUserID, decimal newBalance)
-        {
-            if (!riskUserBook.ContainsKey(RiskUserID)) return;
-
-            riskUserBook[RiskUserID].Balance = newBalance;
-        }
+        #endregion
     }
 }

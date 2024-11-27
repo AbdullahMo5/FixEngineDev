@@ -8,6 +8,8 @@ namespace FixEngine.Entity
         [MaxLength(250)]
         public string Name { get; set; }
         public int GatewayId { get; set; }
+        public int MarginCall { get; set; }
+        public int StopOut { get; set; }
         public string CreatedBy { get; set; }
         public Gateway Gateway { get; set; }
     }

@@ -52,6 +52,7 @@ namespace FixEngine.Controllers
                 Balance = model.Balance,
                 GroupId = model.GroupId,
                 Name = model.Name,
+                Leverage = model.Leverage,
             };
             newRiskUser.IP = HttpContext.Connection.RemoteIpAddress?.ToString();
 

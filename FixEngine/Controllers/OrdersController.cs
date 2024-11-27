@@ -44,7 +44,7 @@ namespace FixEngine.Controllers
                 FinalLoss = model.FinalLoss,
                 FinalProfit = model.FinalProfit,
                 GatewayType = model.GatewayType,
-                RiskUserId = 3,
+                RiskUserId = model.RiskUserId,
                 StopLoss = model.StopLoss,
                 TakeProfit = model.TakeProfit,
             };
@@ -53,6 +53,7 @@ namespace FixEngine.Controllers
                 , model.Quantity, model.EntryPrice);
 
             var x = _riskUserService.GetGatewayType(3);
+            var user = await _riskUserService.GetByIdAsync(model.RiskUserId);
             var client = _apiService.GetClient(token);
             if (client == null) return BadRequest("wrong Client");
 
@@ -61,7 +62,7 @@ namespace FixEngine.Controllers
                     client.SendNewOrderRequest(orderRequest);
                     return Ok("Send to centroid");
                 case GatewayType.BBook:
-                    await client.simulator.ReceiveOrder(orderRequest);
+                    client.simulator.NewOrderRequest(orderRequest, user);
                     return Ok("Send to simulator");
             }
 

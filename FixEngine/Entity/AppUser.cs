@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Text.Json.Serialization;
 
 namespace FixEngine.Entity
 {
@@ -6,6 +7,7 @@ namespace FixEngine.Entity
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        [JsonIgnore]
         public List<RiskUser> RiskUsers { get; set; } = new List<RiskUser>();
     }
 }

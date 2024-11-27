@@ -1,4 +1,5 @@
 ﻿using Common;
+using FixEngine.Models;
 using FixEngine.Services;
 using FixEngine.Shared;
 using Managers;
@@ -407,21 +408,39 @@ namespace FixEngine.Hubs
             }
         }
         #region Test
-        public void SendBOrderRequest(string token, NewOrderRequestParameters parameters)
-        {
-            var client = _apiService.GetClient(token);
-            client.simulator.ReceiveOrder(parameters);
-        }
+        //public async void SendBOrderRequest(string token, NewOrderRequestParameters parameters)
+        //{
+        //    var client = _apiService.GetClient(token);
+        //    if (client != null)
+        //    {
+        //       client.simulator.NewOrderRequest(parameters);
+        //    }
+        //}
         public async IAsyncEnumerable<Entity.Position> StreamBPositions(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var client = _apiService.GetClient(token);
             if (client != null)
             {
-                while (await client.simulator.positionChannel.Reader.WaitToReadAsync(cancellationToken))
+                while (await client.simulator.PositionChannel.Reader.WaitToReadAsync(cancellationToken))
                 {
-                    while (client.simulator.positionChannel.Reader.TryRead(out var position))
+                    while (client.simulator.PositionChannel.Reader.TryRead(out var position))
                     {
                         yield return position;
+                    }
+                }
+            }
+        }
+
+        public async IAsyncEnumerable<UserMargin> StreamUsers(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            var client = _apiService.GetClient(token);
+            if (client != null)
+            {
+                while (await client.simulator.UserChannel.Reader.WaitToReadAsync(cancellationToken))
+                {
+                    while (client.simulator.UserChannel.Reader.TryRead(out var user))
+                    {
+                        yield return user;
                     }
                 }
             }

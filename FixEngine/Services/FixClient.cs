@@ -308,6 +308,7 @@ namespace FixEngine.Services
                 if (symbol != null)
                 {
                     SymbolQuote quote = new SymbolQuote(Int32.Parse(symbol.Id), symbol.Name, symbolQuote.Bid, symbolQuote.Ask, symbol.Digits);
+                    await simulator.SaveNewPrice(quote);
                     await MarketDataSnapshotFullRefreshChannel.Writer.WriteAsync(quote);
                 }
             }
@@ -543,7 +544,7 @@ namespace FixEngine.Services
         public DateTime? Expiry { get; init; }
 
         public long? PositionId { get; init; }
-        public long RiskUserId { get; init; }
+        public int RiskUserId { get; init; }
 
         public string Designation { get; init; }
     }

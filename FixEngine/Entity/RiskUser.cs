@@ -1,4 +1,6 @@
-﻿namespace FixEngine.Entity
+﻿using System.Text.Json.Serialization;
+
+namespace FixEngine.Entity
 {
     public class RiskUser
     {
@@ -8,8 +10,10 @@
         public string Password { get; set; }
         public string IP { get; set; }
         public decimal Balance { get; set; }
+        public int Leverage { get; set; }
         public int GroupId { get; set; }
         public string AppUserId { get; set; }
+        [JsonIgnore]
         public AppUser AppUser { get; set; }
         public Group Group { get; set; }
     }

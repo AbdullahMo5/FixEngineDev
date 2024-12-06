@@ -15,6 +15,7 @@ namespace FixEngine.Entity
         public string AppUserId { get; set; }
         [JsonIgnore]
         public AppUser AppUser { get; set; }
+        [JsonIgnore]
         public Group Group { get; set; }
     }
 }

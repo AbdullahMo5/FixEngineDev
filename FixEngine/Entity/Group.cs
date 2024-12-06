@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace FixEngine.Entity
 {
@@ -12,5 +13,7 @@ namespace FixEngine.Entity
         public int StopOut { get; set; }
         public string CreatedBy { get; set; }
         public Gateway Gateway { get; set; }
+        [JsonIgnore]
+        public List<RiskUser> RiskUsers { get; set; } = new List<RiskUser>();
     }
 }

@@ -602,7 +602,7 @@ namespace FixEngine.Migrations
                         .IsRequired();
 
                     b.HasOne("FixEngine.Entity.Group", "Group")
-                        .WithMany()
+                        .WithMany("RiskUsers")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -664,6 +664,11 @@ namespace FixEngine.Migrations
                 });
 
             modelBuilder.Entity("FixEngine.Entity.AppUser", b =>
+                {
+                    b.Navigation("RiskUsers");
+                });
+
+            modelBuilder.Entity("FixEngine.Entity.Group", b =>
                 {
                     b.Navigation("RiskUsers");
                 });

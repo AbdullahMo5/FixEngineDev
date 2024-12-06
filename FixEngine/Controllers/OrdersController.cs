@@ -52,12 +52,13 @@ namespace FixEngine.Controllers
             var orderRequest = new NewOrderRequestParameters(model.Type, model.ClOrdId, model.SymbolId, model.SymbolName, model.TradeSide
                 , model.Quantity, model.EntryPrice);
 
-            var x = _riskUserService.GetGatewayType(3);
             var user = await _riskUserService.GetByIdAsync(model.RiskUserId);
-            var client = _apiService.GetClient(token);
+            var x = _riskUserService.GetGatewayType(user.GroupId);
+            var client = _apiService.GetClient(token);                            //For Test purpose only
             if (client == null) return BadRequest("wrong Client");
 
-            switch (x) {
+            switch (x)
+            {
                 case GatewayType.ABook:
                     client.SendNewOrderRequest(orderRequest);
                     return Ok("Send to centroid");
@@ -66,10 +67,10 @@ namespace FixEngine.Controllers
                     return Ok("Send to simulator");
             }
 
-            if (await _orderService.AddAsync(order) > 0)
-                return Ok(order);
-            return BadRequest("Something went wrong");
+            //if (await _orderService.AddAsync(order) > 0)
+            //    return Ok(order);
+            //return BadRequest("Something went wrong");
+            return Ok(order);
         }
-
     }
 }

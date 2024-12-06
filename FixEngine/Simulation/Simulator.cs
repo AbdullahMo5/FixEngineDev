@@ -32,7 +32,7 @@ namespace FixEngine.Simulation
             _positionsService = positionsService;
             _riskUserService = riskUserService;
             positionSimulation = new PositionSimulation(orderService, positionsService, riskUserService);
-            marginSimulation = new MarginSimulation(PositionChannel, UserChannel);
+            marginSimulation = new MarginSimulation(PositionChannel, UserChannel, MarginChannel);
         }
 
         #region Metods

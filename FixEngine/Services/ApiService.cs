@@ -8,6 +8,7 @@ namespace FixEngine.Services
         private ExecutionManager _executionManager;
         private SymbolService _symbolService;
         private ConcurrentDictionary<string, FixClient> _clients = new();
+        private ConcurrentDictionary<int, FixClient> clients = new();           //For Test purpose only
         private OrderService _orderService;
         private PositionService _positionsService;
         private RiskUserService _riskUserService;
@@ -29,6 +30,7 @@ namespace FixEngine.Services
             client.Connect();
 
             _clients.AddOrUpdate(id, client, (id, oldClient) => client);
+            clients.AddOrUpdate(1, client, (id, oldClient) => client);          //For Test purpose only
             //ConsumeClient(id);
             //TODO: start consumer
         }
@@ -36,6 +38,11 @@ namespace FixEngine.Services
         public FixClient? GetClient(string id)
         {
             return _clients.ContainsKey(id) ? _clients[id] : null;
+        }
+
+        public FixClient? GetClient(int id)                                  //For Test purpose only
+        {
+            return clients.ContainsKey(id) ? clients[id] : null;
         }
 
         public void RemoveClient(string id)

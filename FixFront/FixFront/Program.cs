@@ -3,7 +3,10 @@ using FixFront.Services;
 using InfluxDB.Client.Api.Domain;
 using InfluxDB.Client.Writes;
 using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 
 class Program
@@ -59,23 +62,36 @@ class Program
         await connection.InvokeAsync("Ping");
         await connection.InvokeAsync("ConnectCentroid", token);
 
-        var newOrder1 = new NewOrderRequestParameters("market", "1", 1, "EURUSD", "buy", 10, 3.1m)
+        var newOrder1 = new CreateOrderModel
         {
-            Expiry = DateTime.Now,
-            RiskUserId = 2,
-            PositionId = 1,
-            Designation = "test"
+            Type = "market",
+            ClOrdId = DateTime.UtcNow.ToLongDateString(),
+            CloseTime = DateTime.UtcNow,
+            Status = "IDK",
+            GatewayType = "BBook",
+            SymbolId = 1,
+            SymbolName = "EURUSD",
+            TradeSide = "buy",
+            Quantity = 10,
+            RiskUserId = 1
         };
-        var newOrder2 = new NewOrderRequestParameters("market", "1", 2, "GBPUSD", "buy", 10, 3.1m)
+        var newOrder2 = new CreateOrderModel
         {
-            Expiry = DateTime.Now,
-            RiskUserId = 2,
-            PositionId = 1,
-            Designation = "test"
+            Type = "market",
+            ClOrdId = DateTime.UtcNow.ToLongDateString(),
+            CloseTime = DateTime.UtcNow,
+            Status = "IDK",
+            GatewayType = "BBook",
+            SymbolId = 2,
+            SymbolName = "GBPUSD",
+            TradeSide = "buy",
+            Quantity = 10,
+            RiskUserId = 1
         };
-        await connection.InvokeAsync("SendBOrderRequest", token, newOrder1);
-        await connection.InvokeAsync("SendBOrderRequest", token, newOrder1);
-        await connection.InvokeAsync("SendBOrderRequest", token, newOrder2);
+
+        await PostHttp($"{_baseUrl}/api/Orders", token, newOrder1);
+        //await PostHttp($"{_baseUrl}/api/Orders", token, newOrder1);
+        //await PostHttp($"{_baseUrl}/api/Orders", token, newOrder2);
 
         var cts = new CancellationTokenSource();
 
@@ -105,12 +121,11 @@ class Program
 
     static async Task FetchUsers(HubConnection connection, string token, CancellationToken cancellationToken)
     {
-        var users = connection.StreamAsync<UserMargin>("StreamUsers", token, cancellationToken);
+        var users = connection.StreamAsync<UserMargin>("StreamMargin", token, cancellationToken);
 
         await foreach (var user in users)
         {
-            Console.WriteLine($"UserID:{user.RiskUserId} Balance:{user.Balance}" +
-                $" Leverage:{user.Leverage} PoseSize:{user.PoseSize} PnL:{user.PNL}");
+            Console.WriteLine($"UserID:{user.RiskUserId}");
         }
     }
 
@@ -168,13 +183,6 @@ class Program
         public string Designation { get; init; }
     }
 
-    public record QouteWithTime(int SymbolId,
-     string SymbolName,
-     decimal Bid,
-     decimal Ask,
-     int Digits,
-     DateTime Time);
-
     public static async Task<string> AuthenticateAsync(string url, string email, string password)
     {
         using var client = new HttpClient();
@@ -200,6 +208,55 @@ class Program
         }
 
         return null;
+    }
+
+    public static async Task<dynamic> PostHttp(string url, string token, object item)
+    {
+        using var client = new HttpClient();
+
+        string jsonBody = JsonConvert.SerializeObject(item);
+        var httpContent = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+
+        var uriBuilder = new UriBuilder(url)
+        {
+            Query = $"token={token}"
+        };
+
+        HttpResponseMessage response = await client.PostAsync(uriBuilder.ToString(), httpContent);
+
+        if(response.IsSuccessStatusCode) 
+        {
+            Console.WriteLine("Post request successful");
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+            return jsonResponse;
+        } else
+        {
+            string failedResponse = $"Post request failed with status code {response.StatusCode}";
+            Console.WriteLine(failedResponse);
+            return failedResponse;
+        }
+    }
+
+    public static async Task<dynamic> GetHttp(string url, string token)
+    {
+        using var client = new HttpClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        HttpResponseMessage response = await client.GetAsync(url);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine("Get request successful");
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject(jsonResponse);
+        }
+        else
+        {
+            string failedResponse = $"Get request failed with status code {response.StatusCode}";
+            Console.WriteLine(failedResponse);
+            return failedResponse;
+        }
     }
 
     public class LoginResponse

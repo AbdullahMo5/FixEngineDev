@@ -416,16 +416,16 @@ namespace FixEngine.Hubs
         //       client.simulator.NewOrderRequest(parameters);
         //    }
         //}
-        public async IAsyncEnumerable<Entity.Position> StreamBPositions(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
+        public async IAsyncEnumerable<Margin> StreamMargin(string token, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var client = _apiService.GetClient(token);
             if (client != null)
             {
-                while (await client.simulator.PositionChannel.Reader.WaitToReadAsync(cancellationToken))
+                while (await client.simulator.MarginChannel.Reader.WaitToReadAsync(cancellationToken))
                 {
-                    while (client.simulator.PositionChannel.Reader.TryRead(out var position))
+                    while (client.simulator.MarginChannel.Reader.TryRead(out var margin))
                     {
-                        yield return position;
+                        yield return margin;
                     }
                 }
             }

@@ -1,7 +1,6 @@
 ﻿using FixEngine.Entity;
 using FixEngine.Models;
 using FixEngine.Services;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using QuickFix.FIX44;
 using System.Collections.Concurrent;
 using System.Threading.Channels;
@@ -14,7 +13,7 @@ namespace FixEngine.Simulation
         #region Fields
         private readonly CustomDictionary usersBook = new CustomDictionary();
         private Channel<Position> positionChannel;
-        private Channel<UserMargin> userChannel;
+        private Channel<Margin> marginChannel;
 
         private readonly BufferBlock<UserMargin> _marginBuffer = new();
         #endregion
@@ -23,10 +22,11 @@ namespace FixEngine.Simulation
         public CustomDictionary UserBook { get { return usersBook; } }
         #endregion
 
-        public MarginSimulation(Channel<Position> positionChannel, Channel<UserMargin> userChannel)
+        public MarginSimulation(Channel<Position> positionChannel, Channel<UserMargin> userChannel, Channel<Margin> marginChannel)
         {
             this.positionChannel = positionChannel;
-            this.userChannel = userChannel;
+            this.marginChannel = marginChannel;
+
         }
 
         #region Public Method
@@ -49,6 +49,18 @@ namespace FixEngine.Simulation
             await CalculatePNL(quote);
         }
 
+        public void ClosePosition(int positionId, int riskUserId, int? symbolId)
+        {
+
+        }
+
+        public void Liquidation()
+        {
+
+        }
+        #endregion
+
+        #region Private Methods
         private void FillMarketPositions(Common.SymbolQuote quote)
         {
             var users = usersBook.GetList(quote.SymbolId);
@@ -99,11 +111,25 @@ namespace FixEngine.Simulation
                 }
                 var userMargin = usersBook.Get(user.RiskUserId);
                 userMargin.PNL = pNl;
-                //await userChannel.Writer.WriteAsync(userMargin);
+                await CalculateMarginLevel(user.RiskUserId);
             }
         }
 
-        private async Task CalculateMarginLevel() { }
+        private async Task CalculateMarginLevel(int riskUserId)
+        {
+            if (!usersBook.ContainsKey(riskUserId)) return;
+            var user = usersBook.Get(riskUserId);
+
+            decimal equity = user.Balance + user.PNL;
+            decimal marginUsed = user.PoseSize / user.Leverage;
+            decimal marginLevel = (equity / marginUsed) * 100;
+
+            Margin margin = new Margin { RiskUserId = riskUserId, Equity = equity, MarginLevel = marginLevel, PNL = user.PNL };
+
+            await marginChannel.Writer.WriteAsync(margin);
+
+            Console.WriteLine($"RiskUserID: {riskUserId} MarginLevel: {marginLevel} Equity: {equity}");
+        }
         #endregion
     }
 }

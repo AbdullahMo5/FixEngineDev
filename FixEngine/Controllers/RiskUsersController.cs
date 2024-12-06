@@ -33,7 +33,7 @@ namespace FixEngine.Controllers
         {
             var riskUser = await _riskUserService.GetByIdAsync(id);
             if (riskUser is null)
-                return NotFound("There is no Gateway with this id");
+                return NotFound("There is no User with this id");
             return Ok(riskUser);
         }
 

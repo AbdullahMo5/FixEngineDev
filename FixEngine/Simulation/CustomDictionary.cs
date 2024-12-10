@@ -3,22 +3,21 @@ using System.Collections.Concurrent;
 
 namespace FixEngine.Simulation
 {
-    public class CustomDictionary               //Enhance UserMargin make them two seperate models. one contains List, othe contains margin
+    public class CustomDictionary               //Enhance UserMargin make it thhree seperate models. one contains List, othe contains margin, one contains lots and pnl
     {
         private readonly ConcurrentDictionary<int, UserMargin> marginBook;    //Key is User Id
-        private readonly ConcurrentDictionary<int?, List<UserMargin>> userBook;     //Key is Symbol Id
+        private readonly ConcurrentDictionary<int?, List<UserMargin>> SymbolUsersBook;     //Key is Symbol Id
 
         public CustomDictionary()
         {
             marginBook = new ConcurrentDictionary<int, UserMargin>();
-            userBook = new ConcurrentDictionary<int?, List<UserMargin>>();
+            SymbolUsersBook = new ConcurrentDictionary<int?, List<UserMargin>>();
         }
 
         public void AddOrUpdate(int key1, int? key2, UserMargin value)
         {
             if(marginBook.ContainsKey(key1))
             {
-                marginBook[key1].PoseSize += value.PoseSize;
                 marginBook[key1].RiskUserId = value.RiskUserId;
                 marginBook[key1].Balance = value.Balance;
                 marginBook[key1].Leverage = value.Leverage;
@@ -26,27 +25,24 @@ namespace FixEngine.Simulation
             }
             else
             {
-                var margn = new UserMargin
+                var margin = new UserMargin
                 {
                     Balance = value.Balance,
                     Leverage = value.Leverage,
                     RiskUserId = value.RiskUserId,
-                    PoseSize = value.PoseSize
                 };
-                margn.UnFilledPositions.AddRange(value.UnFilledPositions);
+                margin.UnFilledPositions.AddRange(value.UnFilledPositions);
 
-                marginBook.TryAdd(key1, margn);
+                marginBook.TryAdd(key1, margin);
             }
 
             //SymbolId Exist
-            if (userBook.ContainsKey(key2))
+            if (SymbolUsersBook.ContainsKey(key2))
             {
                 //UserMargin Exist
-                var userMargin = userBook[key2].FirstOrDefault(u => u.RiskUserId == key1);
+                var userMargin = SymbolUsersBook[key2].FirstOrDefault(u => u.RiskUserId == key1);
                 if (userMargin != null)
                 {
-                    userMargin.PoseSize += value.PoseSize;  //Increse PosSize
-
                     userMargin.Balance = value.Balance;     //Update Balance
                     userMargin.Leverage = value.Leverage;   //Update Leverage
                     userMargin.UnFilledPositions.AddRange(value.UnFilledPositions);    //Update List
@@ -56,16 +52,15 @@ namespace FixEngine.Simulation
                     var margn = new UserMargin { 
                         Balance = value.Balance, 
                         Leverage = value.Leverage,
-                        RiskUserId = value.RiskUserId, 
-                        PoseSize = value.PoseSize };
+                        RiskUserId = value.RiskUserId};
                     margn.UnFilledPositions.AddRange(value.UnFilledPositions);
 
-                    userBook[key2].Add(margn);
+                    SymbolUsersBook[key2].Add(margn);
                 }
             }
             else
             {
-                var usersList = userBook.GetOrAdd(key2, _ => new List<UserMargin>());
+                var usersList = SymbolUsersBook.GetOrAdd(key2, _ => new List<UserMargin>());
                 usersList.Add(value);
             }
         }
@@ -79,14 +74,7 @@ namespace FixEngine.Simulation
 
         public bool ContainsKey(int? key2)
         {
-            if (userBook.ContainsKey(key2)) return true;
-
-            return false;
-        }
-
-        public bool ContainsKey(int key1, int? key2)
-        {
-            if (marginBook.ContainsKey(key1) && userBook.ContainsKey(key2)) return true;
+            if (SymbolUsersBook.ContainsKey(key2)) return true;
 
             return false;
         }
@@ -100,7 +88,7 @@ namespace FixEngine.Simulation
 
         public List<UserMargin> GetList(int key)
         {
-            if (userBook.ContainsKey(key)) return userBook[key];
+            if (SymbolUsersBook.ContainsKey(key)) return SymbolUsersBook[key];
 
             return null;
         }

@@ -292,22 +292,23 @@ namespace FixEngine.Services
 
         private async Task OnMarketDataSnapshotFullRefresh(QuickFix.FIX44.MarketDataSnapshotFullRefresh marketDataSnapshotFullRefresh)
         {
-            if (_lp.Equals("CTRADER", StringComparison.OrdinalIgnoreCase))
-            {
-                var symbolQuote = marketDataSnapshotFullRefresh.GetSymbolQuote();
-                var symbol = _symbols.DefaultIfEmpty(null).First(i => i.Id == symbolQuote.SymbolId);
-                SymbolQuote quote = new SymbolQuote(symbolQuote.SymbolId, symbol.Name, symbolQuote.Bid, symbolQuote.Ask, symbol.Digits);
-                if (symbol != null)
-                    await MarketDataSnapshotFullRefreshChannel.Writer.WriteAsync(quote);
-            }
-            else if (_lp.Equals("CENTROID", StringComparison.OrdinalIgnoreCase))
+            //if (_lp.Equals("CTRADER", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    var symbolQuote = marketDataSnapshotFullRefresh.GetSymbolQuote();
+            //    var symbol = _symbols.DefaultIfEmpty(null).First(i => i.Id == symbolQuote.SymbolId);
+            //    SymbolQuote quote = new SymbolQuote(symbolQuote.SymbolId, symbol.Name, symbolQuote.Bid, symbolQuote.Ask, symbol.Digits);
+            //    if (symbol != null)
+            //        await MarketDataSnapshotFullRefreshChannel.Writer.WriteAsync(quote);
+            //}
+            //else if (_lp.Equals("CENTROID", StringComparison.OrdinalIgnoreCase))
+            if (_lp.Equals("CENTROID", StringComparison.OrdinalIgnoreCase))
             {
                 var symbolQuote = marketDataSnapshotFullRefresh.GetSymbolQuoteII();
                 var symbol = _symbolService.GetSymbolByLP(_lp, symbolQuote.SymbolName);
 
                 if (symbol != null)
                 {
-                    SymbolQuote quote = new SymbolQuote(Int32.Parse(symbol.Id), symbol.Name, symbolQuote.Bid, symbolQuote.Ask, symbol.Digits);
+                    SymbolQuote quote = new SymbolQuote(Int32.Parse(symbol.Id), symbol.Name, symbolQuote.Bid, symbolQuote.Ask, symbol.Digits, symbol.ContractSize);
                     await simulator.SaveNewPrice(quote);
                     await MarketDataSnapshotFullRefreshChannel.Writer.WriteAsync(quote);
                 }

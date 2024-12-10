@@ -7,16 +7,16 @@ namespace FixEngine.Services
     public class SymbolService : GenericService<Symbol>, ISymbolService
     {
         private static SymbolResource[] demoSymbols = {
-                new SymbolResource("1", "EURUSD", "CENTROID", "EURUSD", 5),
-                new SymbolResource("2", "GBPUSD", "CENTROID", "GBPUSD", 5),
-                new SymbolResource("3", "AUDUSD", "CENTROID", "AUDUSD", 5),
-                new SymbolResource("4", "USDJPY", "CENTROID", "USDJPY", 3),
-                new SymbolResource("5", "USDCAD", "CENTROID", "USDCAD", 5),
-                new SymbolResource("6", "NZDUSD", "CENTROID", "NZDUSD", 5),
-                new SymbolResource("7", "USDCHF", "CENTROID", "USDCHF", 5),
-                new SymbolResource("8", "USDCHF", "CENTROID", "USDCHF", 5),
-                new SymbolResource("9", "GBPJPY", "CENTROID", "GBPJPY", 5),
-                new SymbolResource("10", "AUDJPY", "CENTROID", "AUDJPY", 5),
+                new SymbolResource("1", "EURUSD", "CENTROID", "EURUSD", 5, 100),
+                new SymbolResource("2", "GBPUSD", "CENTROID", "GBPUSD", 5, 100),
+                new SymbolResource("3", "AUDUSD", "CENTROID", "AUDUSD", 5, 100),
+                new SymbolResource("4", "USDJPY", "CENTROID", "USDJPY", 3, 100),
+                new SymbolResource("5", "USDCAD", "CENTROID", "USDCAD", 5, 100),
+                new SymbolResource("6", "NZDUSD", "CENTROID", "NZDUSD", 5, 100),
+                new SymbolResource("7", "USDCHF", "CENTROID", "USDCHF", 5, 100),
+                new SymbolResource("8", "USDCHF", "CENTROID", "USDCHF", 5, 100),
+                new SymbolResource("9", "GBPJPY", "CENTROID", "GBPJPY", 5, 100),
+                new SymbolResource("10", "AUDJPY", "CENTROID", "AUDJPY", 5, 100),
 
         };
         private ILogger<SymbolService> _logger;

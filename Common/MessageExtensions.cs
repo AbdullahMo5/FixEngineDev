@@ -116,7 +116,7 @@ namespace Common
                     ask = mdEntryPxFieldValue;
                 }
             }
-            return new SymbolQuote(message.GetField(new IntField(Tags.Symbol)).getValue(),"", bid, ask, 0);
+            return new SymbolQuote(message.GetField(new IntField(Tags.Symbol)).getValue(),"", bid, ask, 0, 0);
         }
         public static SymbolQuoteII GetSymbolQuoteII(this QuickFix.FIX44.MarketDataSnapshotFullRefresh message)
         {
@@ -367,7 +367,7 @@ namespace Common
 
     public record Symbol(int Id, string Name, int Digits);
 
-    public record SymbolQuote(int SymbolId, string SymbolName, decimal Bid, decimal Ask, int Digits);
+    public record SymbolQuote(int SymbolId, string SymbolName, decimal Bid, decimal Ask, int Digits, int ContractSize);
     public record SymbolQuoteII(string SymbolName, decimal Bid, decimal Ask, int Digits);
 
     public record PositionUpdate

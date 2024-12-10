@@ -93,24 +93,32 @@ namespace FixEngine.Simulation
             foreach (var user in users)
             {
                 if (user.FilledPositions.Count <= 0) return;
-                decimal pNl = 0;
+                decimal TpNl = 0;
+                decimal Tlot = 0;
 
                 foreach (var position in user.FilledPositions)
                 {
                     if (position.TradeSide.ToLowerInvariant() == "buy")
                     {
-                        pNl += (quote.Bid - position.EntryPrice) * position.Volume; //Check the logic
-                        position.Profit = (quote.Bid - position.EntryPrice) * position.Volume; //Check the logic
+                        TpNl += (quote.Bid - position.EntryPrice) * position.Volume * quote.ContractSize; //Check the logic
+                        position.Profit = (quote.Bid - position.EntryPrice) * position.Volume * quote.ContractSize; //Check the logic
                     }
                     else
                     {
-                        pNl += (position.EntryPrice - quote.Ask) * position.Volume; //Check the logic
-                        position.Profit = (position.EntryPrice - quote.Ask) * position.Volume; //Check the logic
+                        TpNl += (position.EntryPrice - quote.Ask) * position.Volume * quote.ContractSize; //Check the logic
+                        position.Profit = (position.EntryPrice - quote.Ask) * position.Volume * quote.ContractSize; //Check the logic
                     }
+                    Tlot += position.Volume;
                     await positionChannel.Writer.WriteAsync(position);
                 }
-                var userMargin = usersBook.Get(user.RiskUserId);
-                userMargin.PNL = pNl;
+                decimal usedMargin = (Tlot * quote.ContractSize) / user.Leverage;
+                var margin = usersBook.Get(user.RiskUserId);
+
+                if (margin.SymboolBook.ContainsKey(quote.SymbolId)) { 
+                    margin.SymboolBook[quote.SymbolId].PnL = TpNl;
+                    margin.SymboolBook[quote.SymbolId].UsedMargin = usedMargin;
+                }
+                else { margin.SymboolBook.Add(quote.SymbolId, new() { PnL = TpNl, UsedMargin = usedMargin }); }
                 await CalculateMarginLevel(user.RiskUserId);
             }
         }
@@ -120,15 +128,41 @@ namespace FixEngine.Simulation
             if (!usersBook.ContainsKey(riskUserId)) return;
             var user = usersBook.Get(riskUserId);
 
-            decimal equity = user.Balance + user.PNL;
-            decimal marginUsed = user.PoseSize / user.Leverage;
-            decimal marginLevel = (equity / marginUsed) * 100;
+            decimal equity = user.Balance + TotalPnL(riskUserId);
+            decimal marginLevel = (equity / TotalUsedmargin(riskUserId)) * 100;
 
             Margin margin = new Margin { RiskUserId = riskUserId, Equity = equity, MarginLevel = marginLevel, PNL = user.PNL };
 
             await marginChannel.Writer.WriteAsync(margin);
 
             Console.WriteLine($"RiskUserID: {riskUserId} MarginLevel: {marginLevel} Equity: {equity}");
+        }
+
+        private decimal TotalPnL(int riskUserId)
+        {
+            decimal tPnL = 0;
+
+            if (!usersBook.ContainsKey(riskUserId)) return tPnL;
+            var user = usersBook.Get(riskUserId);
+            foreach (var item in user.SymboolBook)
+            {
+                tPnL += item.Value.PnL;
+            }
+
+            return tPnL;
+        }
+        private decimal TotalUsedmargin(int riskUserId)
+        {
+            decimal tLot = 0;
+
+            if (!usersBook.ContainsKey(riskUserId)) return tLot;
+            var user = usersBook.Get(riskUserId);
+            foreach (var item in user.SymboolBook)
+            {
+                tLot += item.Value.UsedMargin;
+            }
+
+            return tLot;
         }
         #endregion
     }

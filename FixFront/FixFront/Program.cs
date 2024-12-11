@@ -13,12 +13,13 @@ class Program
 {
     private static HubConnection connection;
     private static InfluxDBService _service = new InfluxDBService();
-    private const string _baseUrl = "https://localhost:7261";
+    private const string _baseUrl = "http://13.93.28.29:84";
+    //private const string _baseUrl = "https://localhost:7261";
     //private const string _baseUrl = "http://20.67.34.118:88";
 
     static async Task Main(string[] args)
     {
-        await Task.Delay(TimeSpan.FromSeconds(5));
+        //await Task.Delay(TimeSpan.FromSeconds(5));
 
         Console.WriteLine("Login");
 
@@ -89,15 +90,15 @@ class Program
             RiskUserId = 1
         };
 
-        await PostHttp($"{_baseUrl}/api/Orders", token, newOrder1);
+        //await PostHttp($"{_baseUrl}/api/Orders", token, newOrder1);
         //await PostHttp($"{_baseUrl}/api/Orders", token, newOrder1);
         //await PostHttp($"{_baseUrl}/api/Orders", token, newOrder2);
 
         var cts = new CancellationTokenSource();
 
-        //await FetchQuotes(connection, token, cts.Token);
+        await FetchQuotes(connection, token, cts.Token);
         //await FetchPositions(connection, token, cts.Token);
-        await FetchUsers(connection, token, cts.Token);
+        //await FetchUsers(connection, token, cts.Token);
 
         Console.WriteLine("Enter trade info to send (or 'exit' to quit):");
         Console.ReadLine();

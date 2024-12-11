@@ -49,9 +49,12 @@ namespace FixEngine.Simulation
             await CalculatePNL(quote);
         }
 
-        public void ClosePosition(int positionId, int riskUserId, int? symbolId)
+        public Position ClosePosition(string positionId, int riskUserId)
         {
+            var user = usersBook.Get(riskUserId);
+            var position = PositionsHandler.ClosePosition(user.FilledPositions, positionId);
 
+            return position;
         }
 
         public void Liquidation()
@@ -98,15 +101,21 @@ namespace FixEngine.Simulation
 
                 foreach (var position in user.FilledPositions)
                 {
+                    decimal pNl = 0;
+
                     if (position.TradeSide.ToLowerInvariant() == "buy")
                     {
-                        TpNl += (quote.Bid - position.EntryPrice) * position.Volume * quote.ContractSize; //Check the logic
-                        position.Profit = (quote.Bid - position.EntryPrice) * position.Volume * quote.ContractSize; //Check the logic
+                        pNl = (quote.Bid - position.EntryPrice) * position.Volume * quote.ContractSize; //Check the logic
+                        TpNl += pNl;
+                        position.Profit = pNl;
+                        position.ClosePrice = quote.Ask;
                     }
                     else
                     {
-                        TpNl += (position.EntryPrice - quote.Ask) * position.Volume * quote.ContractSize; //Check the logic
-                        position.Profit = (position.EntryPrice - quote.Ask) * position.Volume * quote.ContractSize; //Check the logic
+                        pNl = (position.EntryPrice - quote.Ask) * position.Volume * quote.ContractSize; //Check the logic
+                        TpNl += pNl;
+                        position.Profit = pNl;
+                        position.ClosePrice = quote.Bid;
                     }
                     Tlot += position.Volume;
                     await positionChannel.Writer.WriteAsync(position);

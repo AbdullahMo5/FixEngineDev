@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public DateTime TimeClose { get; set; } = DateTime.UtcNow;
+        public Guid PositionId { get; set; }
         public Order Order { get; set; }
         public int OrderId { get; set; }
         public int RiskUserId { get; set; }

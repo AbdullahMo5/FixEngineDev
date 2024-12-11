@@ -152,6 +152,13 @@ builder.Services.AddAuthentication(opt =>
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
+
+app.UseCors(options =>
+      options.AllowAnyOrigin()
+      .AllowAnyMethod()
+      .AllowAnyHeader());
+
+
 app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/secure"), appBuilder =>
 {
     appBuilder.UseMiddleware<ApiKeyValidationMiddleware>();
@@ -163,11 +170,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors(options =>
-    options.WithOrigins("http://localhost:3000", "http://127.0.0.1:5000")
-    .AllowAnyHeader()
-    .WithMethods("GET", "POST")
-    .AllowCredentials());
 
 app.UseHttpsRedirection();
 

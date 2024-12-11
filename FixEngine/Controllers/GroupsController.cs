@@ -50,21 +50,15 @@ namespace FixEngine.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(int groupId, Group group)
+        public async Task<IActionResult> Update(int groupId, CreateGroupModel group)
         {
-            if (group.Id != groupId)
-                return BadRequest("Id in paremeters does not match id in the body");
-
             var isGatewayExist = await _gatewayService.IsExist(e => e.Id == group.GatewayId);
-            if (isGatewayExist)
+            if (!isGatewayExist)
                 return BadRequest("There is no gateway with this id");
 
             var groupFromDb = await _groupService.GetByIdAsync(groupId);
             if (groupFromDb is null)
                 return BadRequest("There is no gateway with this id");
-
-            if (await _groupService.IsExist(e => e.Name.ToLower() == group.Name.ToLower()))
-                return BadRequest("Group Is Already Exist");
 
             groupFromDb.Name = group.Name;
             groupFromDb.GatewayId = group.GatewayId;

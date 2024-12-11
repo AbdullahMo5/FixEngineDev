@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FixEngine.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20241204062839_AddDatabase")]
-    partial class AddDatabase
+    [Migration("20241211073337_AddDataBase")]
+    partial class AddDataBase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

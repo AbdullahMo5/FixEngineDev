@@ -12,8 +12,9 @@ namespace FixEngine.Services
         private OrderService _orderService;
         private PositionService _positionsService;
         private RiskUserService _riskUserService;
+        private GroupService _groupService;
         public ApiService(ILogger<ApiService> logger, ExecutionManager executionManager,
-            SymbolService symbolService, OrderService orderService, PositionService positionsService, RiskUserService riskUserService)
+            SymbolService symbolService, OrderService orderService, PositionService positionsService, RiskUserService riskUserService, GroupService groupService)
         {
             _logger = logger;
             _executionManager = executionManager;
@@ -22,10 +23,11 @@ namespace FixEngine.Services
             _positionsService = positionsService;
             Console.WriteLine("hello world!");
             _riskUserService = riskUserService;
+            _groupService = groupService;
         }
         public async Task ConnectClient(ApiCredentials apiCredentials, string id, string lp)
         {
-            var client = new FixClient(apiCredentials, lp, _symbolService, _orderService, _positionsService, _riskUserService);
+            var client = new FixClient(apiCredentials, lp, _symbolService, _orderService, _positionsService, _riskUserService, _groupService);
 
             client.Connect();
 

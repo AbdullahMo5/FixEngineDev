@@ -76,6 +76,7 @@ namespace FixEngine.Controllers
             riskFromDb.Balance = model.Balance;
             riskFromDb.Name = model.Name;
             riskFromDb.GroupId = model.GroupId;
+            riskFromDb.Leverage = model.Leverage;
             riskFromDb.Password = _passwordHasher.HashPassword(riskFromDb, model.Password);
             if (await _riskUserService.Update(riskFromDb) > 0)
                 return Ok("updated success");

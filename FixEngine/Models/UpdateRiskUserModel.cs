@@ -12,6 +12,7 @@ namespace FixEngine.Models
         public string Password { get; set; }
         public string IP { get; set; }
         public decimal Balance { get; set; }
+        public int Leverage { get; set; }
         public int GroupId { get; set; }
     }
 }

@@ -65,6 +65,7 @@ builder.Services.AddSingleton<SymbolService>();
 builder.Services.AddSingleton<OrderService>();
 builder.Services.AddSingleton<PositionService>();
 builder.Services.AddSingleton<RiskUserService>();
+builder.Services.AddSingleton<GroupService>();
 builder.Services.AddSingleton<ExecutionManager>();
 builder.Services.AddSingleton<ApiService>();
 builder.Services.AddSingleton<SessionManager>();
@@ -145,19 +146,11 @@ builder.Services.AddAuthentication(opt =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true
     };
-
-
 });
 
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
-
-app.UseCors(options =>
-      options.AllowAnyOrigin()
-      .AllowAnyMethod()
-      .AllowAnyHeader());
-
 
 app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/secure"), appBuilder =>
 {
@@ -170,6 +163,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+//Change this to manual
+app.UseCors(options =>
+      options.WithOrigins("http://localhost:3000")
+      .AllowAnyHeader()
+      .WithMethods("GET", "POST", "PUT", "DELETE")
+      .AllowCredentials());
+
 
 app.UseHttpsRedirection();
 

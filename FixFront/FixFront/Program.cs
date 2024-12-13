@@ -13,8 +13,9 @@ class Program
 {
     private static HubConnection connection;
     private static InfluxDBService _service = new InfluxDBService();
-    private const string _baseUrl = "http://13.93.28.29:84";
-    //private const string _baseUrl = "https://localhost:7261";
+    //private const string _baseUrl = "http://13.93.28.29:84";
+    //private const string _baseUrl = "http://20.67.34.118:88";
+    private const string _baseUrl = "https://localhost:7261";
     //private const string _baseUrl = "http://20.67.34.118:88";
 
     static async Task Main(string[] args)
@@ -24,6 +25,7 @@ class Program
         Console.WriteLine("Login");
 
         var token = await AuthenticateAsync($"{_baseUrl}/api/Auth/Login", "user@example.com", "Pass!123");
+        //var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InVzZXJAZXhhbXBsZS5jb20iLCJyb2xlIjoidXNlciIsIm5iZiI6MTczNDAwOTg5NiwiZXhwIjoxNzM0MDk2Mjk2LCJpYXQiOjE3MzQwMDk4OTYsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjcyNjEiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAifQ.-MSxfBAnu27rxNbnRAaKLHALn8pyl64Dn6FMzFZlepg";
         if (token != null)
         {
             Console.WriteLine("Login successful! Token stored.");
@@ -31,7 +33,7 @@ class Program
         else
         {
             Console.WriteLine("Login failed.");
-            return;
+            //return;
         }
 
         connection = new HubConnectionBuilder()
@@ -61,6 +63,7 @@ class Program
         Console.WriteLine("Connected to the Trade Hub");
 
         await connection.InvokeAsync("Ping");
+        //return;
         await connection.InvokeAsync("ConnectCentroid", token);
 
         var newOrder1 = new CreateOrderModel
@@ -90,15 +93,15 @@ class Program
             RiskUserId = 1
         };
 
-        //await PostHttp($"{_baseUrl}/api/Orders", token, newOrder1);
-        //await PostHttp($"{_baseUrl}/api/Orders", token, newOrder1);
-        //await PostHttp($"{_baseUrl}/api/Orders", token, newOrder2);
+        await PostHttp($"{_baseUrl}/api/Orders", token, newOrder1);
+        await PostHttp($"{_baseUrl}/api/Orders", token, newOrder1);
+        await PostHttp($"{_baseUrl}/api/Orders", token, newOrder2);
 
         var cts = new CancellationTokenSource();
 
-        await FetchQuotes(connection, token, cts.Token);
+        //await FetchQuotes(connection, token, cts.Token);
         //await FetchPositions(connection, token, cts.Token);
-        //await FetchUsers(connection, token, cts.Token);
+        await FetchUsers(connection, token, cts.Token);
 
         Console.WriteLine("Enter trade info to send (or 'exit' to quit):");
         Console.ReadLine();

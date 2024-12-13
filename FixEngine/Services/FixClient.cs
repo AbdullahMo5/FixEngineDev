@@ -27,9 +27,9 @@ namespace FixEngine.Services
 
         private ApiCredentials _credentials;
         private SymbolService _symbolService;
-        public FixClient(ApiCredentials credentials, string lp, SymbolService symbolService, OrderService orderService, PositionService positionsService, RiskUserService riskUserService)
+        public FixClient(ApiCredentials credentials, string lp, SymbolService symbolService, OrderService orderService, PositionService positionsService, RiskUserService riskUserService, GroupService groupService)
         {
-            simulator = new Simulator(orderService, positionsService, riskUserService);
+            simulator = new Simulator(orderService, positionsService, riskUserService, groupService);
             _credentials = credentials;
             _account = credentials.Account;
             _symbolService = symbolService;

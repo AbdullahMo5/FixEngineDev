@@ -11,13 +11,15 @@ namespace FixEngine.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly IRiskUserService _riskUserService;
+        private readonly IGroupService _groupService;
         private readonly ApiService _apiService;
 
-        public OrdersController(IOrderService orderService, IRiskUserService riskUserService, ApiService apiService)
+        public OrdersController(IOrderService orderService, IRiskUserService riskUserService, IGroupService groupService, ApiService apiService)
         {
             _orderService = orderService;
             _riskUserService = riskUserService;
             _apiService = apiService;
+            _groupService = groupService;
         }
 
         [HttpGet("GetAll")]
@@ -43,7 +45,6 @@ namespace FixEngine.Controllers
                 EntryPrice = model.EntryPrice,
                 FinalLoss = model.FinalLoss,
                 FinalProfit = model.FinalProfit,
-                GatewayType = model.GatewayType,
                 RiskUserId = model.RiskUserId,
                 StopLoss = model.StopLoss,
                 TakeProfit = model.TakeProfit,
@@ -53,6 +54,9 @@ namespace FixEngine.Controllers
                 , model.Quantity, model.EntryPrice);
 
             var user = await _riskUserService.GetByIdAsync(model.RiskUserId);
+            if (user == null) return BadRequest("wrong User");
+            var group = await _groupService.GetByIdAsync(user.GroupId);
+            if (group == null) return BadRequest("wrong Group");
             var x = _riskUserService.GetGatewayType(user.GroupId);
             var client = _apiService.GetClient(token);                            //For Test purpose only
             if (client == null) return BadRequest("wrong Client");
@@ -63,14 +67,13 @@ namespace FixEngine.Controllers
                     client.SendNewOrderRequest(orderRequest);
                     return Ok("Send to centroid");
                 case GatewayType.BBook:
-                    client.simulator.NewOrderRequest(orderRequest, user);
+                    client.simulator.NewOrderRequest(orderRequest, user, group);
                     return Ok("Send to simulator");
             }
 
-            //if (await _orderService.AddAsync(order) > 0)
-            //    return Ok(order);
-            //return BadRequest("Something went wrong");
-            return Ok(order);
+            if (await _orderService.AddAsync(order) > 0) return Ok(order);
+
+            return BadRequest("Something went wrong");
         }
     }
 }

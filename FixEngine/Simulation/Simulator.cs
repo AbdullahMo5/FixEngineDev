@@ -13,6 +13,7 @@ namespace FixEngine.Simulation
         private OrderService _orderService;
         private PositionService _positionsService;
         private RiskUserService _riskUserService;
+        private GroupService _groupService;
         private PositionSimulation positionSimulation;
         private MarginSimulation marginSimulation;
 
@@ -23,7 +24,7 @@ namespace FixEngine.Simulation
         public Channel<Margin> MarginChannel { get; } = Channel.CreateUnbounded<Margin>();
         #endregion
 
-        public Simulator(OrderService orderService, PositionService positionsService, RiskUserService riskUserService)
+        public Simulator(OrderService orderService, PositionService positionsService, RiskUserService riskUserService, GroupService groupService)
         {
             var incomingPrice = new ActionBlock<Common.SymbolQuote>(Simulation);
             var linkOptions = new DataflowLinkOptions { PropagateCompletion = true };
@@ -33,39 +34,43 @@ namespace FixEngine.Simulation
             _riskUserService = riskUserService;
             positionSimulation = new PositionSimulation(orderService, positionsService, riskUserService);
             marginSimulation = new MarginSimulation(PositionChannel, UserChannel, MarginChannel);
+            _groupService = groupService;
         }
 
         #region Metods
         public async Task SaveNewPrice(Common.SymbolQuote quote)
         {
             await _quoteBuffer.SendAsync(quote);
-            //await Simulation(quote);
+            //await UpdateDataTest(quote);
         }
 
-        public async Task<Position> ClosePosition(Position closePosition)
-        => await positionSimulation.ClosePosition(closePosition); 
-
-        public void NewOrderRequest(NewOrderRequestParameters newOrderRequest, RiskUser user)
+        public async Task<Position> ClosePosition(string closePosition, int riskuserId, int symbolId)
         {
-            //positionSimulation.ReceiveOrder(newOrderRequest);
-            marginSimulation.ReceiveOrder(newOrderRequest, user);
+           return marginSimulation.ClosePosition(closePosition, riskuserId, symbolId);
+        }
 
-            //var newOrder = new Order
-            //{
-            //    EntryPrice = newOrderRequest.TargetPrice,
-            //    Status = newOrderRequest.TradeSide,
-            //    GatewayType = GatewayType.BBook.ToString(),
-            //    RiskUserId = newOrderRequest.RiskUserId
-            //};
-
-            //await _orderService.AddAsync(newOrder);
+        public void NewOrderRequest(NewOrderRequestParameters newOrderRequest, RiskUser user, Group group)
+        {
+            marginSimulation.ReceiveOrder(newOrderRequest, user, group);
         }
 
         private async Task Simulation(Common.SymbolQuote quote)
         {
-            //await positionSimulation.Simulation(quote, PositionChannel);
-            //Console.WriteLine($"Simulate: {quote.SymbolName}");
             await marginSimulation.Simulation(quote);
+        }
+
+        private async Task UpdateDataTest(Common.SymbolQuote quote)
+        {
+            var users = marginSimulation.UserBook.GetList(quote.SymbolId);
+            if (users == null) return;
+            foreach (var user in users)
+            {
+                var DBUser = await _riskUserService.GetByIdAsync(user.RiskUserId);
+                var DBGroup = await _groupService.GetByIdAsync(user.GroupId);
+                if(DBUser == null || DBGroup == null) continue;
+
+                marginSimulation.UpdateData(user.RiskUserId, quote.SymbolId, DBUser, DBGroup);
+            }
         }
         #endregion
     }

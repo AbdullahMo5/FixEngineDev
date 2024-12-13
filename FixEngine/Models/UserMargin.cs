@@ -6,6 +6,7 @@ namespace FixEngine.Models
     public class UserMargin
     {
         public int RiskUserId { get; set; }
+        public int GroupId { get; set; }
         public decimal Balance { get; set; }
         public decimal PNL { get; set; }
         public decimal Equity { get; set; }

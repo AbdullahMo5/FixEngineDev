@@ -12,10 +12,9 @@ namespace FixEngine.Simulation
     {
         #region Fields
         private readonly CustomDictionary usersBook = new CustomDictionary();
+        private readonly ConcurrentDictionary<int, Group> groupBook = new ConcurrentDictionary<int, Group>();
         private Channel<Position> positionChannel;
         private Channel<Margin> marginChannel;
-
-        private readonly BufferBlock<UserMargin> _marginBuffer = new();
         #endregion
 
         #region Properties
@@ -30,16 +29,18 @@ namespace FixEngine.Simulation
         }
 
         #region Public Method
-        public void ReceiveOrder(NewOrderRequestParameters newOrderRequest, RiskUser user)
+        public void ReceiveOrder(NewOrderRequestParameters newOrderRequest, RiskUser user, Group group)
         {
             var userMargin = new UserMargin();
 
+            userMargin.GroupId = group.Id;
             userMargin.Balance = user.Balance;
             userMargin.Leverage = user.Leverage;
             userMargin.RiskUserId = newOrderRequest.RiskUserId;
             userMargin.PoseSize = newOrderRequest.Quantity;
             userMargin.UnFilledPositions.Add(PositionsHandler.NewUnFilledPosition(newOrderRequest));
 
+            groupBook.TryAdd(group.Id, group);
             usersBook.AddOrUpdate(newOrderRequest.RiskUserId, newOrderRequest.SymbolId, userMargin);
             Console.WriteLine("Received Order!!");
         }
@@ -49,17 +50,44 @@ namespace FixEngine.Simulation
             await CalculatePNL(quote);
         }
 
-        public Position ClosePosition(string positionId, int riskUserId)
+        public Position ClosePosition(string positionId, int riskUserId, int symbolId)
         {
-            var user = usersBook.Get(riskUserId);
+            var users = usersBook.GetList(symbolId);
+            if (users == null) return null;
+            var user = users.FirstOrDefault(u => u.RiskUserId == riskUserId);
+            if (user == null) return null;
             var position = PositionsHandler.ClosePosition(user.FilledPositions, positionId);
 
             return position;
         }
 
-        public void Liquidation()
+        public void UpdateData(int userId, int? symbolId, RiskUser dbUser, Group dbGroup)
         {
+            var user = usersBook.Get(userId);
+            if (user == null) return;
 
+            user.Balance = dbUser.Balance;
+            user.Leverage = dbUser.Leverage;
+
+            var isGroupExist = groupBook.TryGetValue(dbGroup.Id, out var group);
+            if (!isGroupExist) return;
+
+            group.MarginCall = dbGroup.MarginCall;
+            group.StopOut = dbGroup.StopOut;
+
+            usersBook.AddOrUpdate(userId, symbolId, user);
+            groupBook.GetOrAdd(dbGroup.Id, group);
+        }
+
+        public void CheckMarginLevel(Margin marginUser, int symbolId)
+        {
+            if (marginUser.MarginLevel >= groupBook[marginUser.GroupId].MarginCall) return;
+
+            //Do Something()
+
+            if (marginUser.MarginLevel >= groupBook[marginUser.GroupId].StopOut) return;
+
+            Liquidation(marginUser.RiskUserId, symbolId);
         }
         #endregion
 
@@ -128,11 +156,11 @@ namespace FixEngine.Simulation
                     margin.SymboolBook[quote.SymbolId].UsedMargin = usedMargin;
                 }
                 else { margin.SymboolBook.Add(quote.SymbolId, new() { PnL = TpNl, UsedMargin = usedMargin }); }
-                await CalculateMarginLevel(user.RiskUserId);
+                await CalculateMarginLevel(user.RiskUserId, quote.SymbolId);
             }
         }
 
-        private async Task CalculateMarginLevel(int riskUserId)
+        private async Task CalculateMarginLevel(int riskUserId, int symbolId)
         {
             if (!usersBook.ContainsKey(riskUserId)) return;
             var user = usersBook.Get(riskUserId);
@@ -141,10 +169,19 @@ namespace FixEngine.Simulation
             decimal marginLevel = (equity / TotalUsedmargin(riskUserId)) * 100;
 
             Margin margin = new Margin { RiskUserId = riskUserId, Equity = equity, MarginLevel = marginLevel, PNL = user.PNL };
-
+            //CheckMarginLevel(margin, symbolId);
             await marginChannel.Writer.WriteAsync(margin);
 
             Console.WriteLine($"RiskUserID: {riskUserId} MarginLevel: {marginLevel} Equity: {equity}");
+        }
+
+        private void Liquidation(int riskuserId, int symbolId)
+        {
+            var users = usersBook.GetList(symbolId);
+            var user = users.FirstOrDefault(u => u.RiskUserId == riskuserId);
+            if (user == null) return;
+
+            //user.FilledPositions.Clear();
         }
 
         private decimal TotalPnL(int riskUserId)

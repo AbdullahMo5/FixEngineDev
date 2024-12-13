@@ -19,6 +19,7 @@ namespace FixEngine.Simulation
             if(marginBook.ContainsKey(key1))
             {
                 marginBook[key1].RiskUserId = value.RiskUserId;
+                marginBook[key1].GroupId = value.GroupId;
                 marginBook[key1].Balance = value.Balance;
                 marginBook[key1].Leverage = value.Leverage;
                 marginBook[key1].UnFilledPositions.AddRange(value.UnFilledPositions);
@@ -27,6 +28,7 @@ namespace FixEngine.Simulation
             {
                 var margin = new UserMargin
                 {
+                    GroupId = value.GroupId,
                     Balance = value.Balance,
                     Leverage = value.Leverage,
                     RiskUserId = value.RiskUserId,
@@ -43,6 +45,7 @@ namespace FixEngine.Simulation
                 var userMargin = SymbolUsersBook[key2].FirstOrDefault(u => u.RiskUserId == key1);
                 if (userMargin != null)
                 {
+                    userMargin.GroupId = value.GroupId;
                     userMargin.Balance = value.Balance;     //Update Balance
                     userMargin.Leverage = value.Leverage;   //Update Leverage
                     userMargin.UnFilledPositions.AddRange(value.UnFilledPositions);    //Update List
@@ -50,6 +53,7 @@ namespace FixEngine.Simulation
                 else
                 {
                     var margn = new UserMargin { 
+                        GroupId = value.GroupId, 
                         Balance = value.Balance, 
                         Leverage = value.Leverage,
                         RiskUserId = value.RiskUserId};

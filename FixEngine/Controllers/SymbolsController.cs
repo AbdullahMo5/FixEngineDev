@@ -1,4 +1,5 @@
-﻿using FixEngine.Services;
+﻿using FixEngine.Resources;
+using FixEngine.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FixEngine.Controllers
@@ -17,5 +18,9 @@ namespace FixEngine.Controllers
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
             => Ok(await _symbolService.GetAllAsync());
+
+        [HttpGet("GetSymbols")]
+        public List<SymbolResource> GetSymbols() 
+            => _symbolService.GetSymbols();
     }
 }

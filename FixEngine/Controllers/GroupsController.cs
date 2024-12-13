@@ -62,6 +62,8 @@ namespace FixEngine.Controllers
 
             groupFromDb.Name = group.Name;
             groupFromDb.GatewayId = group.GatewayId;
+            groupFromDb.MarginCall = group.MarginCall;
+            groupFromDb.StopOut = group.StopOut;
             if (await _groupService.Update(groupFromDb) > 0)
                 return Ok("Updated success");
 

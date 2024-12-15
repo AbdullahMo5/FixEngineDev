@@ -75,5 +75,16 @@ namespace FixEngine.Controllers
 
             return BadRequest("Something went wrong");
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var order = await _orderService.GetByIdAsync(id);
+            if (order is null)
+                return BadRequest("There is no order with this id");
+            if (await _orderService.Delete(order) > 0)
+                return Ok("Deleted success");
+            return BadRequest("Something went wrong");
+        }
     }
 }
